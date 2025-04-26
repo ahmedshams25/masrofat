@@ -6,6 +6,10 @@
     <title>تطبيق إدارة المصروفات المتكامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --primary-color: #4361ee;
@@ -52,6 +56,33 @@
         header h1 {
             font-size: 2.2rem;
             margin-bottom: 10px;
+        }
+
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-color);
         }
 
         .balance-card {
@@ -335,6 +366,44 @@
             margin-top: 20px;
         }
 
+        .auth-modal-content {
+            max-width: 400px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .auth-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .sync-status {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: center;
+            margin-top: 10px;
+        }
+
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -375,86 +444,151 @@
         <header>
             <h1>تطبيق إدارة المصروفات المتكامل</h1>
             <p>تابع مصروفاتك وحافظ على ميزانيتك بسهولة</p>
+            
+            <div id="authContainer" class="auth-container">
+                <button class="btn btn-sm" id="loginBtn">تسجيل الدخول</button>
+                <button class="btn btn-outline btn-sm" id="registerBtn">تسجيل جديد</button>
+            </div>
+            
+            <div id="userContainer" class="user-info" style="display: none;">
+                <div class="user-avatar" id="userAvatar"></div>
+                <span id="userEmail"></span>
+                <button class="btn btn-danger btn-sm" id="logoutBtn">تسجيل الخروج</button>
+            </div>
         </header>
 
-        <div class="balance-card fade-in">
-            <h2>رصيدك الحالي</h2>
-            <div class="balance-amount" id="currentBalance">0.00 ج.م</div>
-            <button class="btn" id="addBalanceBtn">إضافة رصيد</button>
-        </div>
-
-        <div class="grid">
-            <div class="card fade-in">
-                <h3>إضافة معاملة</h3>
-                <form id="transactionForm">
-                    <div class="form-group">
-                        <label for="transactionType">نوع المعاملة</label>
-                        <select class="form-control" id="transactionType" required>
-                            <option value="income">دخل</option>
-                            <option value="expense">مصروف</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="transactionAmount">المبلغ</label>
-                        <input type="number" class="form-control" id="transactionAmount" placeholder="أدخل المبلغ" required step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="transactionCategory">الفئة</label>
-                        <select class="form-control" id="transactionCategory" required>
-                            <option value="food">طعام</option>
-                            <option value="transport">مواصلات</option>
-                            <option value="shopping">تسوق</option>
-                            <option value="bills">فواتير</option>
-                            <option value="entertainment">ترفيه</option>
-                            <option value="salary">مرتب</option>
-                            <option value="other">أخرى</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="transactionDescription">الوصف (اختياري)</label>
-                        <input type="text" class="form-control" id="transactionDescription" placeholder="أدخل وصفًا للمعاملة">
-                    </div>
-                    <button type="submit" class="btn btn-success">حفظ المعاملة</button>
-                </form>
+        <div id="appContent" style="display: none;">
+            <div class="balance-card fade-in">
+                <h2>رصيدك الحالي</h2>
+                <div class="balance-amount" id="currentBalance">0.00 ج.م</div>
+                <button class="btn" id="addBalanceBtn">إضافة رصيد</button>
+                <div class="sync-status" id="syncStatus">جاري المزامنة...</div>
             </div>
 
-            <div class="card fade-in">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 style="margin: 0;">المعاملات</h3>
-                    <button class="btn btn-outline btn-sm" id="viewAllBtn">عرض الكل</button>
+            <div class="grid">
+                <div class="card fade-in">
+                    <h3>إضافة معاملة</h3>
+                    <form id="transactionForm">
+                        <div class="form-group">
+                            <label for="transactionType">نوع المعاملة</label>
+                            <select class="form-control" id="transactionType" required>
+                                <option value="income">دخل</option>
+                                <option value="expense">مصروف</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionAmount">المبلغ</label>
+                            <input type="number" class="form-control" id="transactionAmount" placeholder="أدخل المبلغ" required step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionCategory">الفئة</label>
+                            <select class="form-control" id="transactionCategory" required>
+                                <option value="food">طعام</option>
+                                <option value="transport">مواصلات</option>
+                                <option value="shopping">تسوق</option>
+                                <option value="bills">فواتير</option>
+                                <option value="entertainment">ترفيه</option>
+                                <option value="salary">مرتب</option>
+                                <option value="project">مشروع</option>
+                                <option value="charity">صدقة</option>
+                                <option value="zakat">زكاة</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionDescription">الوصف (اختياري)</label>
+                            <input type="text" class="form-control" id="transactionDescription" placeholder="أدخل وصفًا للمعاملة">
+                        </div>
+                        <button type="submit" class="btn btn-success">حفظ المعاملة</button>
+                    </form>
+                </div>
+
+                <div class="card fade-in">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0;">المعاملات</h3>
+                        <button class="btn btn-outline btn-sm" id="viewAllBtn">عرض الكل</button>
+                    </div>
+                    
+                    <div class="search-container">
+                        <input type="text" class="form-control search-input" id="searchInput" placeholder="ابحث عن معاملة...">
+                        <button class="btn btn-sm" id="searchBtn">بحث</button>
+                    </div>
+                    
+                    <ul class="transactions-list" id="transactionsList">
+                        <li class="transaction-item empty-message">جاري تحميل المعاملات...</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="stats-container fade-in">
+                <h2>الإحصائيات والرسوم البيانية</h2>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="monthly">الشهرية</div>
+                    <div class="tab" data-tab="categories">حسب الفئة</div>
                 </div>
                 
-                <div class="search-container">
-                    <input type="text" class="form-control search-input" id="searchInput" placeholder="ابحث عن معاملة...">
-                    <button class="btn btn-sm" id="searchBtn">بحث</button>
+                <div class="tab-content active" id="monthlyTab">
+                    <div class="chart-container">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
                 </div>
                 
-                <ul class="transactions-list" id="transactionsList">
-                    <!-- Transactions will be added here dynamically -->
-                    <li class="transaction-item empty-message">لا توجد معاملات مسجلة بعد</li>
-                </ul>
+                <div class="tab-content" id="categoriesTab">
+                    <div class="chart-container">
+                        <canvas id="categoriesChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="stats-container fade-in">
-            <h2>الإحصائيات والرسوم البيانية</h2>
-            
-            <div class="tabs">
-                <div class="tab active" data-tab="monthly">الشهرية</div>
-                <div class="tab" data-tab="categories">حسب الفئة</div>
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="authModalTitle">تسجيل الدخول</h3>
+                <button class="close-btn" id="closeAuthModal">&times;</button>
             </div>
             
-            <div class="tab-content active" id="monthlyTab">
-                <div class="chart-container">
-                    <canvas id="monthlyChart"></canvas>
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-auth-tab="login">تسجيل الدخول</div>
+                <div class="auth-tab" data-auth-tab="register">تسجيل جديد</div>
+            </div>
+            
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="loginEmail">البريد الإلكتروني</label>
+                    <input type="email" class="form-control" id="loginEmail" placeholder="أدخل بريدك الإلكتروني" required>
                 </div>
-            </div>
-            
-            <div class="tab-content" id="categoriesTab">
-                <div class="chart-container">
-                    <canvas id="categoriesChart"></canvas>
+                <div class="form-group">
+                    <label for="loginPassword">كلمة المرور</label>
+                    <input type="password" class="form-control" id="loginPassword" placeholder="أدخل كلمة المرور" required>
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn">تسجيل الدخول</button>
+                </div>
+                <div id="loginError" style="color: var(--danger-color); text-align: center; margin-top: 10px;"></div>
+            </form>
+            
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="registerEmail">البريد الإلكتروني</label>
+                    <input type="email" class="form-control" id="registerEmail" placeholder="أدخل بريدك الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">كلمة المرور</label>
+                    <input type="password" class="form-control" id="registerPassword" placeholder="أدخل كلمة المرور" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">تأكيد كلمة المرور</label>
+                    <input type="password" class="form-control" id="confirmPassword" placeholder="أكد كلمة المرور" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">تسجيل جديد</button>
+                </div>
+                <div id="registerError" style="color: var(--danger-color); text-align: center; margin-top: 10px;"></div>
+            </form>
         </div>
     </div>
 
@@ -507,6 +641,9 @@
                         <option value="bills">فواتير</option>
                         <option value="entertainment">ترفيه</option>
                         <option value="salary">مرتب</option>
+                        <option value="project">مشروع</option>
+                        <option value="charity">صدقة</option>
+                        <option value="zakat">زكاة</option>
                         <option value="other">أخرى</option>
                     </select>
                 </div>
@@ -543,6 +680,22 @@
     </div>
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbYerrLcTE4o44bsBXPynHQ6ArXvtyEro",
+            authDomain: "masrofat-c544f.firebaseapp.com",
+            projectId: "masrofat-c544f",
+            storageBucket: "masrofat-c544f.appspot.com",
+            messagingSenderId: "997053169222",
+            appId: "1:997053169222:web:5cdd2a2901265b7f2ad447",
+            measurementId: "G-RTBRP79JDL"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Get references to DOM elements
@@ -570,18 +723,34 @@
             const cancelEditBtn = document.getElementById('cancelEditBtn');
             const cancelEditBtn2 = document.getElementById('cancelEditBtn2');
             const deleteTransactionBtn = document.getElementById('deleteTransactionBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const authModal = document.getElementById('authModal');
+            const closeAuthModal = document.getElementById('closeAuthModal');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const authTabs = document.querySelectorAll('.auth-tab');
+            const authContainer = document.getElementById('authContainer');
+            const userContainer = document.getElementById('userContainer');
+            const userEmail = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const appContent = document.getElementById('appContent');
+            const syncStatus = document.getElementById('syncStatus');
+            const loginError = document.getElementById('loginError');
+            const registerError = document.getElementById('registerError');
             
             // Initialize data
-            let balance = localStorage.getItem('balance') ? parseFloat(localStorage.getItem('balance')) : 0;
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            let balance = 0;
+            let transactions = [];
+            let user = null;
+            let unsubscribeTransactions = null;
             
             // Initialize charts
             let monthlyChart, categoriesChart;
             
-            // Update UI
-            updateBalance();
-            renderTransactions();
-            initCharts();
+            // Set up auth state listener
+            auth.onAuthStateChanged(handleAuthStateChanged);
             
             // Event listeners
             addBalanceBtn.addEventListener('click', showBalanceModal);
@@ -603,6 +772,19 @@
             cancelEditBtn2.addEventListener('click', hideEditModal);
             editForm.addEventListener('submit', handleEditSubmit);
             deleteTransactionBtn.addEventListener('click', handleDeleteTransaction);
+            loginBtn.addEventListener('click', () => showAuthModal('login'));
+            registerBtn.addEventListener('click', () => showAuthModal('register'));
+            logoutBtn.addEventListener('click', handleLogout);
+            closeAuthModal.addEventListener('click', hideAuthModal);
+            loginForm.addEventListener('submit', handleLogin);
+            registerForm.addEventListener('submit', handleRegister);
+            
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.authTab;
+                    showAuthTab(tabName);
+                });
+            });
             
             // Tab switching
             tabs.forEach(tab => {
@@ -623,12 +805,181 @@
             });
             
             // Functions
+            function handleAuthStateChanged(userData) {
+                if (userData) {
+                    // User is signed in
+                    user = userData;
+                    authContainer.style.display = 'none';
+                    userContainer.style.display = 'flex';
+                    appContent.style.display = 'block';
+                    
+                    userEmail.textContent = user.email;
+                    userAvatar.textContent = user.email.charAt(0).toUpperCase();
+                    
+                    // Load user data
+                    loadUserData();
+                } else {
+                    // User is signed out
+                    user = null;
+                    authContainer.style.display = 'flex';
+                    userContainer.style.display = 'none';
+                    appContent.style.display = 'none';
+                    
+                    // Unsubscribe from previous listener
+                    if (unsubscribeTransactions) {
+                        unsubscribeTransactions();
+                        unsubscribeTransactions = null;
+                    }
+                }
+            }
+            
+            function showAuthModal(tab) {
+                hideAllModals();
+                authModal.style.display = 'block';
+                showAuthTab(tab);
+                loginError.textContent = '';
+                registerError.textContent = '';
+            }
+            
+            function hideAuthModal() {
+                authModal.style.display = 'none';
+            }
+            
+            function showAuthTab(tabName) {
+                authTabs.forEach(tab => {
+                    if (tab.dataset.authTab === tabName) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+                
+                if (tabName === 'login') {
+                    loginForm.classList.add('active');
+                    registerForm.classList.remove('active');
+                } else {
+                    loginForm.classList.remove('active');
+                    registerForm.classList.add('active');
+                }
+            }
+            
+            function handleLogin(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        hideAuthModal();
+                    })
+                    .catch(error => {
+                        loginError.textContent = getAuthErrorMessage(error.code);
+                    });
+            }
+            
+            function handleRegister(e) {
+                e.preventDefault();
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    registerError.textContent = 'كلمة المرور غير متطابقة';
+                    return;
+                }
+                
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => {
+                        hideAuthModal();
+                    })
+                    .catch(error => {
+                        registerError.textContent = getAuthErrorMessage(error.code);
+                    });
+            }
+            
+            function handleLogout() {
+                auth.signOut();
+            }
+            
+            function getAuthErrorMessage(code) {
+                switch(code) {
+                    case 'auth/invalid-email':
+                        return 'بريد إلكتروني غير صالح';
+                    case 'auth/user-disabled':
+                        return 'هذا الحساب معطل';
+                    case 'auth/user-not-found':
+                        return 'لا يوجد حساب بهذا البريد الإلكتروني';
+                    case 'auth/wrong-password':
+                        return 'كلمة المرور غير صحيحة';
+                    case 'auth/email-already-in-use':
+                        return 'هذا البريد الإلكتروني مستخدم بالفعل';
+                    case 'auth/weak-password':
+                        return 'كلمة المرور ضعيفة (يجب أن تكون 6 أحرف على الأقل)';
+                    default:
+                        return 'حدث خطأ أثناء المصادقة';
+                }
+            }
+            
+            function loadUserData() {
+                syncStatus.textContent = 'جاري تحميل البيانات...';
+                
+                // Load balance
+                db.collection('users').doc(user.uid).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            balance = doc.data().balance || 0;
+                            updateBalance();
+                        } else {
+                            // Initialize user data
+                            db.collection('users').doc(user.uid).set({
+                                balance: 0
+                            });
+                            balance = 0;
+                            updateBalance();
+                        }
+                    });
+                
+                // Subscribe to transactions
+                unsubscribeTransactions = db.collection('transactions')
+                    .where('userId', '==', user.uid)
+                    .orderBy('date', 'desc')
+                    .onSnapshot(snapshot => {
+                        transactions = [];
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            transactions.push({
+                                id: doc.id,
+                                ...data,
+                                date: data.date.toDate().toISOString()
+                            });
+                        });
+                        
+                        renderTransactions();
+                        updateCharts();
+                        syncStatus.textContent = 'تمت مزامنة البيانات بنجاح';
+                        
+                        setTimeout(() => {
+                            syncStatus.textContent = '';
+                        }, 3000);
+                    }, error => {
+                        console.error('Error getting transactions:', error);
+                        syncStatus.textContent = 'خطأ في مزامنة البيانات';
+                    });
+            }
+            
             function updateBalance() {
                 currentBalanceEl.textContent = balance.toFixed(2) + ' ج.م';
-                localStorage.setItem('balance', balance.toString());
+                
+                // Update in Firestore
+                if (user) {
+                    db.collection('users').doc(user.uid).update({
+                        balance: balance
+                    });
+                }
             }
             
             function showBalanceModal() {
+                hideAllModals();
                 balanceModal.style.display = 'block';
                 newBalanceAmount.focus();
             }
@@ -673,36 +1024,43 @@
             
             function addTransaction(type, amount, category, description) {
                 const transaction = {
-                    id: Date.now(),
                     type,
                     amount,
                     category,
                     description,
-                    date: new Date().toISOString()
+                    date: new Date(),
+                    userId: user.uid
                 };
                 
+                // Add to Firestore
+                db.collection('transactions').add(transaction)
+                    .then(() => {
+                        // The transaction will be added to the list via the snapshot listener
+                    })
+                    .catch(error => {
+                        console.error('Error adding transaction:', error);
+                        syncStatus.textContent = 'خطأ في إضافة المعاملة';
+                    });
+                
+                // Update balance immediately (will be confirmed when Firestore updates)
                 if (type === 'income') {
                     balance += amount;
                 } else {
                     balance -= amount;
                 }
-                
-                transactions.unshift(transaction);
                 updateBalance();
-                saveTransactions();
-                renderTransactions();
-                updateCharts();
-            }
-            
-            function saveTransactions() {
-                localStorage.setItem('transactions', JSON.stringify(transactions));
             }
             
             function renderTransactions(filteredTransactions = null) {
                 const transactionsToRender = filteredTransactions || transactions.slice(0, 5);
                 
-                if (transactionsToRender.length === 0) {
+                if (transactions.length === 0) {
                     transactionsList.innerHTML = '<li class="transaction-item empty-message">لا توجد معاملات مسجلة بعد</li>';
+                    return;
+                }
+                
+                if (transactionsToRender.length === 0) {
+                    transactionsList.innerHTML = '<li class="transaction-item empty-message">لا توجد نتائج للبحث</li>';
                     return;
                 }
                 
@@ -756,6 +1114,9 @@
                     'bills': 'فواتير',
                     'entertainment': 'ترفيه',
                     'salary': 'مرتب',
+                    'project': 'مشروع',
+                    'charity': 'صدقة',
+                    'zakat': 'زكاة',
                     'other': 'أخرى',
                     'balance': 'رصيد'
                 };
@@ -793,6 +1154,7 @@
             }
             
             function showAllTransactions() {
+                hideAllModals();
                 allTransactionsModal.style.display = 'block';
                 renderAllTransactions();
             }
@@ -847,6 +1209,7 @@
                 document.getElementById('editTransactionCategory').value = transaction.category;
                 document.getElementById('editTransactionDescription').value = transaction.description;
                 
+                hideAllModals();
                 editModal.style.display = 'block';
             }
             
@@ -857,89 +1220,64 @@
             function handleEditSubmit(e) {
                 e.preventDefault();
                 
-                const transactionId = parseInt(document.getElementById('editTransactionId').value);
+                const transactionId = document.getElementById('editTransactionId').value;
                 const type = document.getElementById('editTransactionType').value;
                 const amount = parseFloat(document.getElementById('editTransactionAmount').value);
                 const category = document.getElementById('editTransactionCategory').value;
                 const description = document.getElementById('editTransactionDescription').value || 'لا يوجد وصف';
                 
                 if (amount && amount > 0) {
-                    const transactionIndex = transactions.findIndex(t => t.id === transactionId);
+                    const transaction = transactions.find(t => t.id === transactionId);
                     
-                    if (transactionIndex === -1) return;
-                    
-                    const oldTransaction = transactions[transactionIndex];
-                    
-                    // Revert old transaction effect on balance
-                    if (oldTransaction.type === 'income') {
-                        balance -= oldTransaction.amount;
-                    } else {
-                        balance += oldTransaction.amount;
-                    }
+                    if (!transaction) return;
                     
                     // Check if new amount is valid
-                    if (type === 'expense' && amount > balance) {
+                    if (type === 'expense' && amount > balance + (transaction.type === 'expense' ? transaction.amount : 0)) {
                         alert('المبلغ المطلوب صرفه أكبر من الرصيد المتاح!');
-                        // Revert balance change
-                        if (oldTransaction.type === 'income') {
-                            balance += oldTransaction.amount;
-                        } else {
-                            balance -= oldTransaction.amount;
-                        }
                         return;
                     }
                     
-                    // Apply new transaction effect on balance
-                    if (type === 'income') {
-                        balance += amount;
-                    } else {
-                        balance -= amount;
-                    }
-                    
-                    // Update transaction
-                    transactions[transactionIndex] = {
-                        ...oldTransaction,
+                    // Update in Firestore
+                    db.collection('transactions').doc(transactionId).update({
                         type,
                         amount,
                         category,
                         description
-                    };
-                    
-                    updateBalance();
-                    saveTransactions();
-                    renderTransactions();
-                    renderAllTransactions();
-                    updateCharts();
-                    hideEditModal();
+                    })
+                    .then(() => {
+                        hideEditModal();
+                    })
+                    .catch(error => {
+                        console.error('Error updating transaction:', error);
+                        syncStatus.textContent = 'خطأ في تعديل المعاملة';
+                    });
                 }
             }
             
             function handleDeleteTransaction() {
                 if (!confirm('هل أنت متأكد من حذف هذه المعاملة؟')) return;
                 
-                const transactionId = parseInt(document.getElementById('editTransactionId').value);
-                const transactionIndex = transactions.findIndex(t => t.id === transactionId);
+                const transactionId = document.getElementById('editTransactionId').value;
+                const transaction = transactions.find(t => t.id === transactionId);
                 
-                if (transactionIndex === -1) return;
+                if (!transaction) return;
                 
-                const transaction = transactions[transactionIndex];
-                
-                // Revert transaction effect on balance
-                if (transaction.type === 'income') {
-                    balance -= transaction.amount;
-                } else {
-                    balance += transaction.amount;
-                }
-                
-                // Remove transaction
-                transactions.splice(transactionIndex, 1);
-                
-                updateBalance();
-                saveTransactions();
-                renderTransactions();
-                renderAllTransactions();
-                updateCharts();
-                hideEditModal();
+                // Delete from Firestore
+                db.collection('transactions').doc(transactionId).delete()
+                    .then(() => {
+                        hideEditModal();
+                    })
+                    .catch(error => {
+                        console.error('Error deleting transaction:', error);
+                        syncStatus.textContent = 'خطأ في حذف المعاملة';
+                    });
+            }
+            
+            function hideAllModals() {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    modal.style.display = 'none';
+                });
             }
             
             function initCharts() {
@@ -1008,7 +1346,10 @@
                                 '#4895ef',
                                 '#560bad',
                                 '#b5179e',
-                                '#f72585'
+                                '#f72585',
+                                '#7209b7',
+                                '#3a0ca3',
+                                '#4361ee'
                             ],
                             borderWidth: 1
                         }]
@@ -1035,8 +1376,6 @@
                         }
                     }
                 });
-                
-                updateCharts();
             }
             
             function updateCharts() {
