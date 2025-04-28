@@ -745,6 +745,7 @@
             let transactions = [];
             let user = null;
             let unsubscribeTransactions = null;
+            let unsubscribeUser = null;
             
             // Initialize charts
             let monthlyChart, categoriesChart;
@@ -804,6 +805,9 @@
                 });
             });
             
+            // Initialize charts
+            initCharts();
+            
             // Functions
             function handleAuthStateChanged(userData) {
                 if (userData) {
@@ -825,10 +829,21 @@
                     userContainer.style.display = 'none';
                     appContent.style.display = 'none';
                     
-                    // Unsubscribe from previous listener
+                    // Reset data
+                    balance = 0;
+                    transactions = [];
+                    updateBalance();
+                    renderTransactions();
+                    updateCharts();
+                    
+                    // Unsubscribe from previous listeners
                     if (unsubscribeTransactions) {
                         unsubscribeTransactions();
                         unsubscribeTransactions = null;
+                    }
+                    if (unsubscribeUser) {
+                        unsubscribeUser();
+                        unsubscribeUser = null;
                     }
                 }
             }
@@ -857,9 +872,11 @@
                 if (tabName === 'login') {
                     loginForm.classList.add('active');
                     registerForm.classList.remove('active');
+                    document.getElementById('authModalTitle').textContent = 'تسجيل الدخول';
                 } else {
                     loginForm.classList.remove('active');
                     registerForm.classList.add('active');
+                    document.getElementById('authModalTitle').textContent = 'تسجيل جديد';
                 }
             }
             
@@ -889,6 +906,12 @@
                 }
                 
                 auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        // Initialize user data
+                        return db.collection('users').doc(userCredential.user.uid).set({
+                            balance: 0
+                        });
+                    })
                     .then(() => {
                         hideAuthModal();
                     })
@@ -923,23 +946,20 @@
             function loadUserData() {
                 syncStatus.textContent = 'جاري تحميل البيانات...';
                 
-                // Load balance
-                db.collection('users').doc(user.uid).get()
-                    .then(doc => {
+                // Load balance with real-time updates
+                unsubscribeUser = db.collection('users').doc(user.uid)
+                    .onSnapshot(doc => {
                         if (doc.exists) {
-                            balance = doc.data().balance || 0;
-                            updateBalance();
-                        } else {
-                            // Initialize user data
-                            db.collection('users').doc(user.uid).set({
-                                balance: 0
-                            });
-                            balance = 0;
+                            const userData = doc.data();
+                            balance = userData.balance || 0;
                             updateBalance();
                         }
+                    }, error => {
+                        console.error('Error loading user data:', error);
+                        syncStatus.textContent = 'خطأ في تحميل بيانات المستخدم';
                     });
                 
-                // Subscribe to transactions
+                // Subscribe to transactions with real-time updates
                 unsubscribeTransactions = db.collection('transactions')
                     .where('userId', '==', user.uid)
                     .orderBy('date', 'desc')
@@ -963,19 +983,12 @@
                         }, 3000);
                     }, error => {
                         console.error('Error getting transactions:', error);
-                        syncStatus.textContent = 'خطأ في مزامنة البيانات';
+                        syncStatus.textContent = 'خطأ في مزامنة المعاملات';
                     });
             }
             
             function updateBalance() {
                 currentBalanceEl.textContent = balance.toFixed(2) + ' ج.م';
-                
-                // Update in Firestore
-                if (user) {
-                    db.collection('users').doc(user.uid).update({
-                        balance: balance
-                    });
-                }
             }
             
             function showBalanceModal() {
@@ -994,12 +1007,20 @@
                 const amount = parseFloat(newBalanceAmount.value);
                 
                 if (amount && amount > 0) {
-                    balance = amount;
-                    updateBalance();
-                    hideBalanceModal();
-                    
-                    // Add this as a transaction
-                    addTransaction('income', amount, 'balance', 'إضافة رصيد جديد');
+                    // Update balance in Firestore
+                    db.collection('users').doc(user.uid).update({
+                        balance: firebase.firestore.FieldValue.increment(amount)
+                    })
+                    .then(() => {
+                        hideBalanceModal();
+                        
+                        // Add this as a transaction
+                        addTransaction('income', amount, 'balance', 'إضافة رصيد جديد');
+                    })
+                    .catch(error => {
+                        console.error('Error updating balance:', error);
+                        syncStatus.textContent = 'خطأ في تحديث الرصيد';
+                    });
                 }
             }
             
@@ -1032,23 +1053,22 @@
                     userId: user.uid
                 };
                 
-                // Add to Firestore
-                db.collection('transactions').add(transaction)
-                    .then(() => {
-                        // The transaction will be added to the list via the snapshot listener
-                    })
-                    .catch(error => {
-                        console.error('Error adding transaction:', error);
-                        syncStatus.textContent = 'خطأ في إضافة المعاملة';
-                    });
+                // First update the balance
+                const balanceUpdate = type === 'income' ? 
+                    firebase.firestore.FieldValue.increment(amount) : 
+                    firebase.firestore.FieldValue.increment(-amount);
                 
-                // Update balance immediately (will be confirmed when Firestore updates)
-                if (type === 'income') {
-                    balance += amount;
-                } else {
-                    balance -= amount;
-                }
-                updateBalance();
+                db.collection('users').doc(user.uid).update({
+                    balance: balanceUpdate
+                })
+                .then(() => {
+                    // Then add the transaction
+                    return db.collection('transactions').add(transaction);
+                })
+                .catch(error => {
+                    console.error('Error adding transaction:', error);
+                    syncStatus.textContent = 'خطأ في إضافة المعاملة';
+                });
             }
             
             function renderTransactions(filteredTransactions = null) {
@@ -1221,28 +1241,43 @@
                 e.preventDefault();
                 
                 const transactionId = document.getElementById('editTransactionId').value;
-                const type = document.getElementById('editTransactionType').value;
-                const amount = parseFloat(document.getElementById('editTransactionAmount').value);
-                const category = document.getElementById('editTransactionCategory').value;
-                const description = document.getElementById('editTransactionDescription').value || 'لا يوجد وصف';
+                const newType = document.getElementById('editTransactionType').value;
+                const newAmount = parseFloat(document.getElementById('editTransactionAmount').value);
+                const newCategory = document.getElementById('editTransactionCategory').value;
+                const newDescription = document.getElementById('editTransactionDescription').value || 'لا يوجد وصف';
                 
-                if (amount && amount > 0) {
+                if (newAmount && newAmount > 0) {
                     const transaction = transactions.find(t => t.id === transactionId);
                     
                     if (!transaction) return;
                     
-                    // Check if new amount is valid
-                    if (type === 'expense' && amount > balance + (transaction.type === 'expense' ? transaction.amount : 0)) {
-                        alert('المبلغ المطلوب صرفه أكبر من الرصيد المتاح!');
-                        return;
+                    // Calculate balance difference
+                    let balanceDifference = 0;
+                    
+                    if (newType === transaction.type) {
+                        // Same type, just amount changed
+                        balanceDifference = newType === 'income' ? 
+                            (newAmount - transaction.amount) : 
+                            (transaction.amount - newAmount);
+                    } else {
+                        // Type changed
+                        balanceDifference = newType === 'income' ? 
+                            (newAmount + transaction.amount) : 
+                            (-newAmount - transaction.amount);
                     }
                     
-                    // Update in Firestore
-                    db.collection('transactions').doc(transactionId).update({
-                        type,
-                        amount,
-                        category,
-                        description
+                    // First update the balance
+                    db.collection('users').doc(user.uid).update({
+                        balance: firebase.firestore.FieldValue.increment(balanceDifference)
+                    })
+                    .then(() => {
+                        // Then update the transaction
+                        return db.collection('transactions').doc(transactionId).update({
+                            type: newType,
+                            amount: newAmount,
+                            category: newCategory,
+                            description: newDescription
+                        });
                     })
                     .then(() => {
                         hideEditModal();
@@ -1262,15 +1297,26 @@
                 
                 if (!transaction) return;
                 
-                // Delete from Firestore
-                db.collection('transactions').doc(transactionId).delete()
-                    .then(() => {
-                        hideEditModal();
-                    })
-                    .catch(error => {
-                        console.error('Error deleting transaction:', error);
-                        syncStatus.textContent = 'خطأ في حذف المعاملة';
-                    });
+                // Calculate balance adjustment
+                const balanceAdjustment = transaction.type === 'income' ? 
+                    -transaction.amount : 
+                    transaction.amount;
+                
+                // First update the balance
+                db.collection('users').doc(user.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(balanceAdjustment)
+                })
+                .then(() => {
+                    // Then delete the transaction
+                    return db.collection('transactions').doc(transactionId).delete();
+                })
+                .then(() => {
+                    hideEditModal();
+                })
+                .catch(error => {
+                    console.error('Error deleting transaction:', error);
+                    syncStatus.textContent = 'خطأ في حذف المعاملة';
+                });
             }
             
             function hideAllModals() {
