@@ -246,8 +246,13 @@
                 </div>
 
                 <div class="card shadow mb-4">
-                    <div class="card-header py-3">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
                         <h6 class="m-0 font-weight-bold text-primary">الإحصائيات الشهرية</h6>
+                        <div>
+                            <select id="yearSelect" class="form-select form-select-sm">
+                                <!-- Years will be populated dynamically -->
+                            </select>
+                        </div>
                     </div>
                     <div class="card-body">
                         <canvas id="monthlyChart"></canvas>
@@ -404,6 +409,7 @@
             const totalExpense = document.getElementById('totalExpense');
             const filterOptions = document.querySelectorAll('.filter-option');
             const searchInput = document.getElementById('searchInput');
+            const yearSelect = document.getElementById('yearSelect');
             
             const editModal = new bootstrap.Modal(document.getElementById('editModal'));
             const editForm = document.getElementById('editForm');
@@ -420,6 +426,8 @@
             let currentUser = null;
             let currentFilter = 'all';
             let currentSearch = '';
+            let currentYear = new Date().getFullYear();
+            let availableYears = [];
 
             // Initialize the app
             init();
@@ -453,6 +461,14 @@
                 filterTransactions(currentFilter, currentSearch);
             });
 
+            // Year selection change
+            yearSelect.addEventListener('change', function() {
+                currentYear = parseInt(this.value);
+                if (currentUser) {
+                    loadUserData();
+                }
+            });
+
             // Edit transaction
             saveEditBtn.addEventListener('click', saveEditedTransaction);
 
@@ -469,6 +485,9 @@
                     themeToggle.classList.replace('bi-moon-fill', 'bi-sun-fill');
                 }
                 
+                // Initialize years dropdown
+                initializeYearDropdown();
+                
                 // Check auth state
                 auth.onAuthStateChanged(user => {
                     if (user) {
@@ -482,6 +501,54 @@
                         authScreen.classList.remove('hidden');
                         appScreen.classList.add('hidden');
                     }
+                });
+            }
+
+            // Initialize year dropdown with current and previous years
+            function initializeYearDropdown() {
+                const currentYear = new Date().getFullYear();
+                yearSelect.innerHTML = '';
+                
+                // Add years from current year to 5 years back
+                for (let year = currentYear; year >= currentYear - 5; year--) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === currentYear) {
+                        option.selected = true;
+                    }
+                    yearSelect.appendChild(option);
+                }
+            }
+
+            // Update years dropdown based on available data
+            function updateYearDropdown(transactions) {
+                availableYears = new Set();
+                const currentYear = new Date().getFullYear();
+                
+                // Always include current year
+                availableYears.add(currentYear);
+                
+                // Extract years from transactions
+                transactions.forEach(transaction => {
+                    const date = new Date(transaction.date);
+                    const year = date.getFullYear();
+                    availableYears.add(year);
+                });
+                
+                // Sort years in descending order
+                const sortedYears = Array.from(availableYears).sort((a, b) => b - a);
+                
+                // Update dropdown
+                yearSelect.innerHTML = '';
+                sortedYears.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === currentYear) {
+                        option.selected = true;
+                    }
+                    yearSelect.appendChild(option);
                 });
             }
 
@@ -568,6 +635,7 @@
                 const userId = currentUser.uid;
                 database.ref('users/' + userId + '/transactions').on('value', snapshot => {
                     const transactions = snapshot.val() || [];
+                    updateYearDropdown(transactions);
                     updateUI(transactions);
                 });
             }
@@ -737,7 +805,8 @@
                         if (search) {
                             transactions = transactions.filter(t => 
                                 t.category.toLowerCase().includes(search) || 
-                                (t.description && t.description.toLowerCase().includes(search))
+                                (t.description && t.description.toLowerCase().includes(search)) ||
+                                t.amount.toString().includes(search)
                             );
                         }
                         
@@ -747,12 +816,17 @@
 
             // Update UI with current data
             function updateUI(transactions) {
-                // Calculate totals
-                const incomeTotal = transactions
+                // Calculate totals for the selected year
+                const yearlyTransactions = transactions.filter(t => {
+                    const date = new Date(t.date);
+                    return date.getFullYear() === currentYear;
+                });
+                
+                const incomeTotal = yearlyTransactions
                     .filter(t => t.type === 'income')
                     .reduce((sum, t) => sum + t.amount, 0);
                 
-                const expenseTotal = transactions
+                const expenseTotal = yearlyTransactions
                     .filter(t => t.type === 'expense')
                     .reduce((sum, t) => sum + t.amount, 0);
                 
@@ -766,8 +840,8 @@
                 // Render transactions
                 renderTransactions(transactions);
                 
-                // Update charts
-                updateCharts(transactions);
+                // Update charts with selected year's data
+                updateCharts(yearlyTransactions);
             }
 
             // Render transactions list
@@ -852,6 +926,12 @@
                 }
                 
                 if (expenses.length === 0) {
+                    // Show message if no expenses
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.font = '16px Arial';
+                    ctx.fillStyle = '#999';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('لا توجد مصروفات لهذا العام', ctx.canvas.width / 2, ctx.canvas.height / 2);
                     return;
                 }
                 
@@ -906,16 +986,12 @@
                 });
             }
 
-            // Update monthly chart
+            // Update monthly chart for selected year
             function updateMonthlyChart(transactions) {
-                // Get current year and month
-                const now = new Date();
-                const currentYear = now.getFullYear();
-                
-                // Group transactions by month
+                // Group transactions by month for the selected year
                 const monthlyData = {};
                 
-                // Initialize all months
+                // Initialize all months with zero values
                 for (let month = 0; month < 12; month++) {
                     monthlyData[month] = {
                         income: 0,
@@ -923,7 +999,7 @@
                     };
                 }
                 
-                // Process transactions
+                // Process transactions for the selected year
                 transactions.forEach(transaction => {
                     const date = new Date(transaction.date);
                     const year = date.getFullYear();
@@ -994,13 +1070,21 @@
                                 stacked: false,
                                 grid: {
                                     display: true
-                                }
+                                },
+                                beginAtZero: true
                             }
                         },
                         plugins: {
                             legend: {
                                 position: 'top',
                                 rtl: true
+                            },
+                            title: {
+                                display: true,
+                                text: `إحصائيات عام ${currentYear}`,
+                                font: {
+                                    size: 16
+                                }
                             }
                         }
                     }
