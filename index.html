@@ -106,6 +106,29 @@
             margin-top: 15px;
         }
 
+        /* Fix for chart containers */
+        .chart-container {
+            position: relative;
+            height: 300px; /* Fixed height for charts */
+            width: 100%;
+        }
+
+        .transactions-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .transactions-table {
+            margin-bottom: 0;
+        }
+
+        .transactions-table thead {
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+            z-index: 1;
+        }
+
         @media (max-width: 768px) {
             .stats-container {
                 flex-direction: column;
@@ -117,6 +140,10 @@
             
             .export-buttons {
                 flex-direction: column;
+            }
+            
+            .chart-container {
+                height: 250px;
             }
         }
     </style>
@@ -268,7 +295,9 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <canvas id="monthlyChart"></canvas>
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -280,7 +309,9 @@
                         </button>
                     </div>
                     <div class="card-body">
-                        <canvas id="expensesChart"></canvas>
+                        <div class="chart-container">
+                            <canvas id="expensesChart"></canvas>
+                        </div>
                         <div class="export-buttons d-flex justify-content-center gap-2 mt-3">
                             <button id="exportExcelBtn" class="btn btn-success btn-sm">
                                 <i class="bi bi-file-earmark-excel"></i> Excel
@@ -294,7 +325,7 @@
             </div>
 
             <div class="col-lg-7 mb-4">
-                <div class="card shadow mb-4">
+                <div class="card shadow">
                     <div class="card-header py-3 d-flex justify-content-between align-items-center">
                         <h6 class="m-0 font-weight-bold text-primary">سجل العمليات</h6>
                         <div>
@@ -311,9 +342,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover" id="transactionsTable">
+                    <div class="card-body p-0">
+                        <div class="transactions-container">
+                            <table class="table table-hover transactions-table mb-0" id="transactionsTable">
                                 <thead>
                                     <tr>
                                         <th>التاريخ</th>
@@ -1154,18 +1185,23 @@
                 });
             }
 
-            // Update charts
+            // Update charts - Fixed: Set fixed height for containers
             function updateCharts(transactions) {
                 updateExpensesChart(transactions);
                 updateMonthlyChart(transactions);
             }
 
-            // Update expenses chart
+            // Update expenses chart with fixed height
             function updateExpensesChart(transactions) {
                 const expenses = transactions.filter(t => t.type === 'expense');
                 
                 // Get chart canvas
-                const ctx = document.getElementById('expensesChart').getContext('2d');
+                const canvas = document.getElementById('expensesChart');
+                const ctx = canvas.getContext('2d');
+                
+                // Set canvas dimensions
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
                 
                 // Destroy previous chart if exists
                 if (expensesChart) {
@@ -1173,12 +1209,15 @@
                 }
                 
                 if (expenses.length === 0) {
+                    // Clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
                     // Show message if no expenses
-                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                    ctx.font = '16px Arial';
+                    ctx.font = '16px Tahoma';
                     ctx.fillStyle = '#999';
                     ctx.textAlign = 'center';
-                    ctx.fillText('لا توجد مصروفات لهذا العام', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('لا توجد مصروفات لهذا العام', canvas.width / 2, canvas.height / 2);
                     return;
                 }
                 
@@ -1200,7 +1239,7 @@
                     '#36b9cc', '#5a5c69', '#858796', '#b7b7b7'
                 ];
                 
-                // Create new chart
+                // Create new chart with responsive options
                 expensesChart = new Chart(ctx, {
                     type: 'pie',
                     data: {
@@ -1210,10 +1249,12 @@
                             backgroundColor: backgroundColors,
                             hoverBackgroundColor: backgroundColors,
                             hoverBorderColor: "rgba(234, 236, 244, 1)",
+                            borderWidth: 2
                         }]
                     },
                     options: {
                         maintainAspectRatio: false,
+                        responsive: true,
                         plugins: {
                             legend: {
                                 position: 'left',
@@ -1221,19 +1262,28 @@
                                 labels: {
                                     usePointStyle: true,
                                     pointStyle: 'circle',
-                                    padding: 20,
+                                    padding: 15,
                                     font: {
-                                        family: 'Tahoma'
+                                        family: 'Tahoma',
+                                        size: 11
                                     }
                                 }
                             }
                         },
-                        cutout: '70%',
+                        cutout: '60%',
+                        layout: {
+                            padding: {
+                                left: 10,
+                                right: 10,
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
                     }
                 });
             }
 
-            // Update monthly chart for selected year
+            // Update monthly chart for selected year with fixed height
             function updateMonthlyChart(transactions) {
                 // Group transactions by month for the selected year
                 const monthlyData = {};
@@ -1276,7 +1326,12 @@
                 }
                 
                 // Get chart canvas
-                const ctx = document.getElementById('monthlyChart').getContext('2d');
+                const canvas = document.getElementById('monthlyChart');
+                const ctx = canvas.getContext('2d');
+                
+                // Set canvas dimensions
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
                 
                 // Destroy previous chart if exists
                 if (monthlyChart) {
@@ -1293,13 +1348,17 @@
                                 label: 'الدخل',
                                 backgroundColor: '#1cc88a',
                                 hoverBackgroundColor: '#17a673',
-                                data: incomeData
+                                data: incomeData,
+                                barPercentage: 0.7,
+                                categoryPercentage: 0.8
                             },
                             {
                                 label: 'المصروفات',
                                 backgroundColor: '#e74a3b',
                                 hoverBackgroundColor: '#be2617',
-                                data: expenseData
+                                data: expenseData,
+                                barPercentage: 0.7,
+                                categoryPercentage: 0.8
                             }
                         ]
                     },
@@ -1311,6 +1370,13 @@
                                 stacked: false,
                                 grid: {
                                     display: false
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    font: {
+                                        size: 10
+                                    }
                                 }
                             },
                             y: {
@@ -1318,19 +1384,32 @@
                                 grid: {
                                     display: true
                                 },
-                                beginAtZero: true
+                                beginAtZero: true,
+                                ticks: {
+                                    font: {
+                                        size: 10
+                                    },
+                                    callback: function(value) {
+                                        return value.toLocaleString('ar-EG');
+                                    }
+                                }
                             }
                         },
                         plugins: {
                             legend: {
                                 position: 'top',
-                                rtl: true
+                                rtl: true,
+                                labels: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
                             },
                             title: {
                                 display: true,
                                 text: `إحصائيات عام ${currentYear}`,
                                 font: {
-                                    size: 16
+                                    size: 14
                                 }
                             }
                         }
