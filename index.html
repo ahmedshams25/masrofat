@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق تتبع المصروفات والدخل</title>
+    <title>مالي - تطبيق تتبع المصروفات والدخل</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
@@ -18,37 +19,101 @@
     <style>
         :root {
             --primary-color: #4e73df;
+            --primary-light: #7a9ef0;
+            --primary-dark: #3a56b4;
             --secondary-color: #f8f9fc;
+            --success-color: #1cc88a;
+            --success-light: #2ce6a0;
+            --danger-color: #e74a3b;
+            --danger-light: #ff6b5b;
+            --warning-color: #f6c23e;
+            --info-color: #36b9cc;
             --text-color: #333;
+            --text-light: #666;
+            --text-lighter: #888;
             --bg-color: #f8f9fc;
             --card-bg: #fff;
             --border-color: #e3e6f0;
+            --shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --radius: 0.75rem;
+            --radius-sm: 0.5rem;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .dark-mode {
             --primary-color: #4e73df;
+            --primary-light: #7a9ef0;
+            --primary-dark: #3a56b4;
             --secondary-color: #2a2a2a;
+            --success-color: #1cc88a;
+            --success-light: #2ce6a0;
+            --danger-color: #e74a3b;
+            --danger-light: #ff6b5b;
+            --warning-color: #f6c23e;
+            --info-color: #36b9cc;
             --text-color: #f8f9fc;
+            --text-light: #d1d3e2;
+            --text-lighter: #b7b9cc;
             --bg-color: #1a1a1a;
             --card-bg: #2a2a2a;
             --border-color: #444;
+            --shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.3);
+            --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
         }
 
         .card {
             background-color: var(--card-bg);
-            border-color: var(--border-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
         }
 
         .form-control, .form-select {
             background-color: var(--card-bg);
             color: var(--text-color);
-            border-color: var(--border-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+
+        .btn {
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
         }
 
         .btn-primary {
@@ -56,34 +121,90 @@
             border-color: var(--primary-color);
         }
 
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-success:hover, .btn-success:focus {
+            background-color: #17a673;
+            border-color: #17a673;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-danger:hover, .btn-danger:focus {
+            background-color: #be2617;
+            border-color: #be2617;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover, .btn-outline-primary:focus {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
         .income {
-            color: #1cc88a;
+            color: var(--success-color);
         }
 
         .expense {
-            color: #e74a3b;
+            color: var(--danger-color);
         }
 
         .transaction-item {
             border-left: 4px solid;
-            transition: transform 0.2s;
+            transition: var(--transition);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+            background-color: var(--card-bg);
         }
 
         .transaction-item:hover {
             transform: translateX(-5px);
+            box-shadow: var(--shadow-sm);
         }
 
         .income-item {
-            border-left-color: #1cc88a;
+            border-left-color: var(--success-color);
         }
 
         .expense-item {
-            border-left-color: #e74a3b;
+            border-left-color: var(--danger-color);
         }
 
         .theme-toggle {
             cursor: pointer;
             font-size: 1.5rem;
+            color: var(--text-color);
+            transition: var(--transition);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(78, 115, 223, 0.1);
+            transform: rotate(15deg);
         }
 
         .auth-container {
@@ -91,11 +212,26 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         }
 
         .auth-card {
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .auth-body {
+            padding: 2.5rem;
         }
 
         .hidden {
@@ -106,16 +242,83 @@
             margin-top: 15px;
         }
 
-        /* Fix for chart containers */
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: none;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .stat-card.balance:before {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        }
+
+        .stat-card.income:before {
+            background: linear-gradient(90deg, var(--success-color) 0%, var(--success-light) 100%);
+        }
+
+        .stat-card.expense:before {
+            background: linear-gradient(90deg, var(--danger-color) 0%, var(--danger-light) 100%);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        /* Chart containers */
         .chart-container {
             position: relative;
-            height: 300px; /* Fixed height for charts */
+            height: 300px;
             width: 100%;
         }
 
         .transactions-container {
             max-height: 600px;
             overflow-y: auto;
+            border-radius: var(--radius-sm);
+        }
+
+        .transactions-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .transactions-container::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+            border-radius: 10px;
+        }
+
+        .transactions-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        .transactions-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
 
         .transactions-table {
@@ -127,15 +330,67 @@
             top: 0;
             background-color: var(--card-bg);
             z-index: 1;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
+        /* App Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .app-title {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .app-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* Modal */
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner 0.75s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .stats-container {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
             
             .stat-card {
-                margin-bottom: 15px;
+                margin-bottom: 0;
             }
             
             .export-buttons {
@@ -145,149 +400,255 @@
             .chart-container {
                 height: 250px;
             }
+            
+            .auth-body {
+                padding: 1.5rem;
+            }
+            
+            .app-header {
+                padding: 1rem 1.5rem;
+            }
+        }
+
+        /* Animation for new transactions */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Badges */
+        .badge-income {
+            background-color: rgba(28, 200, 138, 0.1);
+            color: var(--success-color);
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+        }
+
+        .badge-expense {
+            background-color: rgba(231, 74, 59, 0.1);
+            color: var(--danger-color);
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+        }
+
+        /* Progress bar */
+        .progress {
+            background-color: var(--secondary-color);
+            border-radius: 1rem;
+            height: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            border-radius: 1rem;
         }
     </style>
 </head>
 <body class="">
     <!-- Authentication Screen -->
     <div id="authScreen" class="auth-container">
-        <div class="auth-card card shadow">
-            <div class="card-body p-5">
-                <h2 class="text-center mb-4">تسجيل الدخول</h2>
+        <div class="auth-card card">
+            <div class="auth-header">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="rounded-circle bg-white p-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-wallet fs-1 text-primary"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold">مالي</h2>
+                <p class="mb-0 opacity-75">تطبيق تتبع المصروفات والدخل الذكي</p>
+            </div>
+            <div class="auth-body">
                 <form id="authForm">
                     <div class="mb-3">
-                        <label for="authEmail" class="form-label">البريد الإلكتروني</label>
-                        <input type="email" class="form-control" id="authEmail" required>
+                        <label for="authEmail" class="form-label fw-semibold">البريد الإلكتروني</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="fas fa-envelope text-primary"></i>
+                            </span>
+                            <input type="email" class="form-control border-start-0 ps-0" id="authEmail" placeholder="example@email.com" required>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="authPassword" class="form-label">كلمة المرور</label>
-                        <input type="password" class="form-control" id="authPassword" required>
+                    <div class="mb-4">
+                        <label for="authPassword" class="form-label fw-semibold">كلمة المرور</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="fas fa-lock text-primary"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0 ps-0" id="authPassword" placeholder="********" required>
+                            <button type="button" class="input-group-text bg-transparent border-start-0" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <button type="button" id="loginBtn" class="btn btn-primary">تسجيل الدخول</button>
-                        <button type="button" id="signupBtn" class="btn btn-outline-primary">إنشاء حساب</button>
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="button" id="loginBtn" class="btn btn-primary btn-lg fw-semibold py-2">
+                            <span id="loginText">تسجيل الدخول</span>
+                            <span id="loginSpinner" class="spinner hidden ms-2"></span>
+                        </button>
+                        <button type="button" id="signupBtn" class="btn btn-outline-primary btn-lg fw-semibold py-2">
+                            <span id="signupText">إنشاء حساب جديد</span>
+                            <span id="signupSpinner" class="spinner hidden ms-2"></span>
+                        </button>
                     </div>
-                    <div id="authMessage" class="text-danger text-center"></div>
+                    <div id="authMessage" class="alert alert-danger text-center d-none">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span id="authMessageText"></span>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- Main Application Screen -->
-    <div id="appScreen" class="container py-4 hidden">
-        <header class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-0">تطبيق تتبع المصروفات والدخل</h1>
-                <small id="userEmail" class="text-muted"></small>
-            </div>
-            <div>
-                <i class="bi bi-moon-fill theme-toggle me-3" id="themeToggle"></i>
-                <button id="logoutBtn" class="btn btn-sm btn-outline-danger">تسجيل الخروج</button>
+    <div id="appScreen" class="container-fluid py-3 px-4 hidden">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="app-title mb-1"><i class="fas fa-wallet me-2"></i>مالي</h1>
+                    <p class="app-subtitle mb-0" id="userEmail">تطبيق تتبع المصروفات والدخل</p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="theme-toggle me-3" id="themeToggle" data-bs-toggle="tooltip" data-bs-placement="left" title="تبديل السمة">
+                        <i class="bi bi-moon-fill"></i>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-light btn-sm fw-semibold">
+                        <i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج
+                    </button>
+                </div>
             </div>
         </header>
 
-        <div class="row stats-container mb-4">
-            <div class="col-md-4 stat-card">
-                <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    الرصيد الحالي</div>
-                                <div class="h5 mb-0 font-weight-bold" id="currentBalance">0 ج.م</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="bi bi-wallet2 fs-1 text-primary"></i>
-                            </div>
+        <!-- Stats Cards -->
+        <div class="stats-container">
+            <div class="stat-card balance card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">الرصيد الحالي</p>
+                            <h3 class="mb-0 fw-bold" id="currentBalance">0 ج.م</h3>
+                            <p class="text-muted small mb-0 mt-2"><span id="balanceChange" class="fw-semibold">0%</span> من الشهر الماضي</p>
+                        </div>
+                        <div class="stat-icon text-primary">
+                            <i class="fas fa-wallet"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 stat-card">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    إجمالي الدخل</div>
-                                <div class="h5 mb-0 font-weight-bold income" id="totalIncome">0 ج.م</div>
+            <div class="stat-card income card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">إجمالي الدخل</p>
+                            <h3 class="mb-0 fw-bold income" id="totalIncome">0 ج.م</h3>
+                            <div class="progress mt-2" style="width: 80%;">
+                                <div class="progress-bar" id="incomeProgress" style="width: 0%"></div>
                             </div>
-                            <div class="col-auto">
-                                <i class="bi bi-arrow-down-circle fs-1 text-success"></i>
-                            </div>
+                        </div>
+                        <div class="stat-icon text-success">
+                            <i class="fas fa-arrow-down-circle"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 stat-card">
-                <div class="card border-left-danger shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                    إجمالي المصروفات</div>
-                                <div class="h5 mb-0 font-weight-bold expense" id="totalExpense">0 ج.م</div>
+            <div class="stat-card expense card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">إجمالي المصروفات</p>
+                            <h3 class="mb-0 fw-bold expense" id="totalExpense">0 ج.م</h3>
+                            <div class="progress mt-2" style="width: 80%;">
+                                <div class="progress-bar bg-danger" id="expenseProgress" style="width: 0%"></div>
                             </div>
-                            <div class="col-auto">
-                                <i class="bi bi-arrow-up-circle fs-1 text-danger"></i>
-                            </div>
+                        </div>
+                        <div class="stat-icon text-danger">
+                            <i class="fas fa-arrow-up-circle"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-5 mb-4">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">إضافة عملية جديدة</h6>
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-5">
+                <!-- Add Transaction Card -->
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="fas fa-plus-circle me-2 text-primary"></i>
+                        <h6 class="m-0 fw-bold">إضافة عملية جديدة</h6>
                     </div>
                     <div class="card-body">
                         <form id="transactionForm">
                             <div class="mb-3">
-                                <label for="amount" class="form-label">المبلغ</label>
-                                <input type="number" class="form-control" id="amount" required step="0.01" min="0.01">
+                                <label for="amount" class="form-label fw-semibold">المبلغ</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="amount" required step="0.01" min="0.01" placeholder="0.00">
+                                    <span class="input-group-text bg-transparent">ج.م</span>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="type" class="form-label fw-semibold">النوع</label>
+                                    <select class="form-select" id="type" required>
+                                        <option value="">اختر النوع</option>
+                                        <option value="income">دخل</option>
+                                        <option value="expense">مصروف</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="category" class="form-label fw-semibold">التصنيف</label>
+                                    <select class="form-select" id="category" required>
+                                        <option value="">اختر التصنيف</option>
+                                        <option value="راتب">راتب</option>
+                                        <option value="هدية">هدية</option>
+                                        <option value="استثمار">استثمار</option>
+                                        <option value="أكل">أكل</option>
+                                        <option value="مواصلات">مواصلات</option>
+                                        <option value="تسوق">تسوق</option>
+                                        <option value="ترفيه">ترفيه</option>
+                                        <option value="فواتير">فواتير</option>
+                                        <option value="أخرى">أخرى</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="mb-3">
-                                <label for="type" class="form-label">النوع</label>
-                                <select class="form-select" id="type" required>
-                                    <option value="">اختر النوع</option>
-                                    <option value="income">دخل</option>
-                                    <option value="expense">مصروف</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="category" class="form-label">التصنيف</label>
-                                <select class="form-select" id="category" required>
-                                    <option value="">اختر التصنيف</option>
-                                    <option value="راتب">راتب</option>
-                                    <option value="هدية">هدية</option>
-                                    <option value="استثمار">استثمار</option>
-                                    <option value="أكل">أكل</option>
-                                    <option value="مواصلات">مواصلات</option>
-                                    <option value="تسوق">تسوق</option>
-                                    <option value="ترفيه">ترفيه</option>
-                                    <option value="فواتير">فواتير</option>
-                                    <option value="أخرى">أخرى</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="date" class="form-label">التاريخ</label>
+                                <label for="date" class="form-label fw-semibold">التاريخ</label>
                                 <input type="date" class="form-control" id="date" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="description" class="form-label">وصف (اختياري)</label>
-                                <textarea class="form-control" id="description" rows="2"></textarea>
+                            <div class="mb-4">
+                                <label for="description" class="form-label fw-semibold">وصف (اختياري)</label>
+                                <textarea class="form-control" id="description" rows="2" placeholder="أضف وصفًا للعملية..."></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">إضافة العملية</button>
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                                <i class="fas fa-plus-circle me-2"></i>إضافة العملية
+                            </button>
                         </form>
                     </div>
                 </div>
 
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">الإحصائيات الشهرية</h6>
+                <!-- Monthly Statistics Card -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chart-line me-2 text-primary"></i>
+                            <h6 class="m-0 fw-bold">الإحصائيات الشهرية</h6>
+                        </div>
                         <div>
                             <select id="yearSelect" class="form-select form-select-sm">
                                 <!-- Years will be populated dynamically -->
@@ -301,11 +662,15 @@
                     </div>
                 </div>
 
-                <div class="card shadow">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">توزيع المصروفات</h6>
-                        <button id="exportExpensesBtn" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-download"></i> تصدير
+                <!-- Expenses Distribution Card -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chart-pie me-2 text-primary"></i>
+                            <h6 class="m-0 fw-bold">توزيع المصروفات</h6>
+                        </div>
+                        <button id="exportExpensesBtn" class="btn btn-outline-primary btn-sm fw-semibold">
+                            <i class="fas fa-download me-1"></i> تصدير
                         </button>
                     </div>
                     <div class="card-body">
@@ -313,31 +678,42 @@
                             <canvas id="expensesChart"></canvas>
                         </div>
                         <div class="export-buttons d-flex justify-content-center gap-2 mt-3">
-                            <button id="exportExcelBtn" class="btn btn-success btn-sm">
-                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            <button id="exportExcelBtn" class="btn btn-success btn-sm fw-semibold">
+                                <i class="fas fa-file-excel me-1"></i> Excel
                             </button>
-                            <button id="exportPdfBtn" class="btn btn-danger btn-sm">
-                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            <button id="exportPdfBtn" class="btn btn-danger btn-sm fw-semibold">
+                                <i class="fas fa-file-pdf me-1"></i> PDF
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-7 mb-4">
-                <div class="card shadow">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">سجل العمليات</h6>
-                        <div>
-                            <input type="text" id="searchInput" class="form-control form-control-sm d-inline-block w-auto me-2" placeholder="بحث...">
-                            <div class="dropdown d-inline-block">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    تصفية
+            <!-- Right Column -->
+            <div class="col-lg-7">
+                <!-- Transactions Card -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-history me-2 text-primary"></i>
+                            <h6 class="m-0 fw-bold">سجل العمليات</h6>
+                        </div>
+                        <div class="d-flex">
+                            <div class="input-group me-2" style="width: 200px;">
+                                <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="بحث...">
+                                <button class="btn btn-outline-secondary btn-sm" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle fw-semibold" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-filter me-1"></i> تصفية
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="filterDropdown">
                                     <li><a class="dropdown-item filter-option" href="#" data-filter="all">الكل</a></li>
-                                    <li><a class="dropdown-item filter-option" href="#" data-filter="income">الدخل</a></li>
-                                    <li><a class="dropdown-item filter-option" href="#" data-filter="expense">المصروفات</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item filter-option" href="#" data-filter="income"><span class="badge-income me-2">دخل</span></a></li>
+                                    <li><a class="dropdown-item filter-option" href="#" data-filter="expense"><span class="badge-expense me-2">مصروف</span></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -347,11 +723,11 @@
                             <table class="table table-hover transactions-table mb-0" id="transactionsTable">
                                 <thead>
                                     <tr>
-                                        <th>التاريخ</th>
+                                        <th class="ps-3">التاريخ</th>
                                         <th>التصنيف</th>
                                         <th>الوصف</th>
                                         <th>المبلغ</th>
-                                        <th>إجراءات</th>
+                                        <th class="pe-3 text-center">إجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody id="transactionsList">
@@ -359,8 +735,12 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="text-center py-3" id="noTransactions">
+                        <div class="text-center py-5" id="noTransactions">
+                            <i class="fas fa-receipt fs-1 text-muted mb-3"></i>
                             <p class="text-muted">لا توجد عمليات مسجلة</p>
+                            <button class="btn btn-primary btn-sm" onclick="document.getElementById('amount').focus()">
+                                <i class="fas fa-plus-circle me-1"></i> إضافة عملية جديدة
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -370,55 +750,62 @@
 
     <!-- Edit Transaction Modal -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">تعديل العملية</h5>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2 text-primary"></i>تعديل العملية</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editForm">
                         <input type="hidden" id="editId">
                         <div class="mb-3">
-                            <label for="editAmount" class="form-label">المبلغ</label>
-                            <input type="number" class="form-control" id="editAmount" required step="0.01" min="0.01">
+                            <label for="editAmount" class="form-label fw-semibold">المبلغ</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="editAmount" required step="0.01" min="0.01" placeholder="0.00">
+                                <span class="input-group-text bg-transparent">ج.م</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editType" class="form-label fw-semibold">النوع</label>
+                                <select class="form-select" id="editType" required>
+                                    <option value="">اختر النوع</option>
+                                    <option value="income">دخل</option>
+                                    <option value="expense">مصروف</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editCategory" class="form-label fw-semibold">التصنيف</label>
+                                <select class="form-select" id="editCategory" required>
+                                    <option value="">اختر التصنيف</option>
+                                    <option value="راتب">راتب</option>
+                                    <option value="هدية">هدية</option>
+                                    <option value="استثمار">استثمار</option>
+                                    <option value="أكل">أكل</option>
+                                    <option value="مواصلات">مواصلات</option>
+                                    <option value="تسوق">تسوق</option>
+                                    <option value="ترفيه">ترفيه</option>
+                                    <option value="فواتير">فواتير</option>
+                                    <option value="أخرى">أخرى</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label for="editType" class="form-label">النوع</label>
-                            <select class="form-select" id="editType" required>
-                                <option value="">اختر النوع</option>
-                                <option value="income">دخل</option>
-                                <option value="expense">مصروف</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editCategory" class="form-label">التصنيف</label>
-                            <select class="form-select" id="editCategory" required>
-                                <option value="">اختر التصنيف</option>
-                                <option value="راتب">راتب</option>
-                                <option value="هدية">هدية</option>
-                                <option value="استثمار">استثمار</option>
-                                <option value="أكل">أكل</option>
-                                <option value="مواصلات">مواصلات</option>
-                                <option value="تسوق">تسوق</option>
-                                <option value="ترفيه">ترفيه</option>
-                                <option value="فواتير">فواتير</option>
-                                <option value="أخرى">أخرى</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editDate" class="form-label">التاريخ</label>
+                            <label for="editDate" class="form-label fw-semibold">التاريخ</label>
                             <input type="date" class="form-control" id="editDate" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="editDescription" class="form-label">وصف (اختياري)</label>
-                            <textarea class="form-control" id="editDescription" rows="2"></textarea>
+                        <div class="mb-4">
+                            <label for="editDescription" class="form-label fw-semibold">وصف (اختياري)</label>
+                            <textarea class="form-control" id="editDescription" rows="2" placeholder="أضف وصفًا للعملية..."></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="button" id="saveEditBtn" class="btn btn-primary">حفظ التعديلات</button>
+                    <button type="button" id="saveEditBtn" class="btn btn-primary fw-semibold">
+                        <i class="fas fa-save me-1"></i> حفظ التعديلات
+                    </button>
                 </div>
             </div>
         </div>
@@ -426,32 +813,33 @@
 
     <!-- Export Options Modal -->
     <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">تصدير بيانات المصروفات</h5>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-download me-2 text-primary"></i>تصدير بيانات المصروفات</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="exportYearSelect" class="form-label">اختر السنة:</label>
+                    <div class="mb-4">
+                        <label for="exportYearSelect" class="form-label fw-semibold">اختر السنة:</label>
                         <select id="exportYearSelect" class="form-select">
                             <!-- Will be populated dynamically -->
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">نوع التصدير:</label>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">نوع التصدير:</label>
                         <div class="d-flex gap-2">
-                            <button id="exportToExcelBtn" class="btn btn-success flex-fill">
-                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            <button id="exportToExcelBtn" class="btn btn-success flex-fill fw-semibold py-2">
+                                <i class="fas fa-file-excel me-2"></i> Excel
                             </button>
-                            <button id="exportToPdfBtn" class="btn btn-danger flex-fill">
-                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            <button id="exportToPdfBtn" class="btn btn-danger flex-fill fw-semibold py-2">
+                                <i class="fas fa-file-pdf me-2"></i> PDF
                             </button>
                         </div>
                     </div>
-                    <div id="exportMessage" class="alert alert-info mt-3 d-none">
-                        جاري تصدير البيانات...
+                    <div id="exportMessage" class="alert alert-info mt-3 d-none align-items-center">
+                        <i class="fas fa-spinner fa-spin me-2"></i>
+                        <span id="exportMessageText">جاري تصدير البيانات...</span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -480,15 +868,25 @@
         const database = firebase.database();
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Bootstrap tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
             // DOM Elements
             const authScreen = document.getElementById('authScreen');
             const appScreen = document.getElementById('appScreen');
             const authForm = document.getElementById('authForm');
             const authEmail = document.getElementById('authEmail');
             const authPassword = document.getElementById('authPassword');
+            const togglePassword = document.getElementById('togglePassword');
             const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loginSpinner = document.getElementById('loginSpinner');
             const signupBtn = document.getElementById('signupBtn');
+            const signupText = document.getElementById('signupText');
+            const signupSpinner = document.getElementById('signupSpinner');
             const authMessage = document.getElementById('authMessage');
+            const authMessageText = document.getElementById('authMessageText');
             const logoutBtn = document.getElementById('logoutBtn');
             const userEmail = document.getElementById('userEmail');
             
@@ -499,6 +897,9 @@
             const currentBalance = document.getElementById('currentBalance');
             const totalIncome = document.getElementById('totalIncome');
             const totalExpense = document.getElementById('totalExpense');
+            const balanceChange = document.getElementById('balanceChange');
+            const incomeProgress = document.getElementById('incomeProgress');
+            const expenseProgress = document.getElementById('expenseProgress');
             const filterOptions = document.querySelectorAll('.filter-option');
             const searchInput = document.getElementById('searchInput');
             const yearSelect = document.getElementById('yearSelect');
@@ -520,6 +921,7 @@
             const exportToExcelBtn = document.getElementById('exportToExcelBtn');
             const exportToPdfBtn = document.getElementById('exportToPdfBtn');
             const exportMessage = document.getElementById('exportMessage');
+            const exportMessageText = document.getElementById('exportMessageText');
             
             let expensesChart = null;
             let monthlyChart = null;
@@ -529,6 +931,7 @@
             let currentYear = new Date().getFullYear();
             let availableYears = [];
             let allTransactions = [];
+            let lastMonthBalance = 0;
 
             // Initialize the app
             init();
@@ -536,6 +939,12 @@
             // Authentication event listeners
             loginBtn.addEventListener('click', loginUser);
             signupBtn.addEventListener('click', signupUser);
+            togglePassword.addEventListener('click', function() {
+                const type = authPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                authPassword.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
             logoutBtn.addEventListener('click', logoutUser);
 
             // Theme toggle
@@ -552,6 +961,7 @@
                 option.addEventListener('click', function(e) {
                     e.preventDefault();
                     currentFilter = this.getAttribute('data-filter');
+                    document.querySelector('#filterDropdown').textContent = this.textContent.trim();
                     filterTransactions(currentFilter, currentSearch);
                 });
             });
@@ -562,7 +972,7 @@
                 filterTransactions(currentFilter, currentSearch);
             });
 
-            // Year selection change - Fixed: Keep selected year
+            // Year selection change
             yearSelect.addEventListener('change', function() {
                 currentYear = parseInt(this.value);
                 updateUI(allTransactions);
@@ -581,13 +991,13 @@
             function init() {
                 // Set today's date as default
                 const today = new Date();
-                const formattedDate = today.toISOString().substr(0, 10);
+                const formattedDate = today.toISOString().split('T')[0];
                 document.getElementById('date').value = formattedDate;
                 
                 // Load theme preference
                 if (localStorage.getItem('darkMode') === 'true') {
                     document.body.classList.add('dark-mode');
-                    themeToggle.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                    themeToggle.querySelector('i').classList.replace('bi-moon-fill', 'bi-sun-fill');
                 }
                 
                 // Initialize years dropdown
@@ -605,6 +1015,9 @@
                         currentUser = null;
                         authScreen.classList.remove('hidden');
                         appScreen.classList.add('hidden');
+                        // Reset auth form
+                        authForm.reset();
+                        authMessage.classList.add('d-none');
                     }
                 });
             }
@@ -644,7 +1057,7 @@
                 // Sort years in descending order
                 const sortedYears = Array.from(availableYears).sort((a, b) => b - a);
                 
-                // Update dropdown - Fixed: Keep current selection
+                // Update dropdown
                 const currentSelected = parseInt(yearSelect.value);
                 yearSelect.innerHTML = '';
                 
@@ -684,7 +1097,7 @@
             function exportToExcel() {
                 const selectedYear = parseInt(exportYearSelect.value);
                 exportMessage.classList.remove('d-none');
-                exportMessage.textContent = 'جاري تصدير البيانات إلى Excel...';
+                exportMessageText.textContent = 'جاري تصدير البيانات إلى Excel...';
                 
                 // Filter transactions for selected year
                 const yearTransactions = allTransactions.filter(t => {
@@ -693,7 +1106,7 @@
                 });
                 
                 if (yearTransactions.length === 0) {
-                    exportMessage.textContent = 'لا توجد بيانات للتصدير في هذه السنة';
+                    exportMessageText.textContent = 'لا توجد بيانات للتصدير في هذه السنة';
                     setTimeout(() => {
                         exportMessage.classList.add('d-none');
                     }, 3000);
@@ -734,7 +1147,7 @@
                 // Generate Excel file
                 XLSX.writeFile(wb, `مصروفات_${selectedYear}.xlsx`);
                 
-                exportMessage.textContent = 'تم تصدير البيانات بنجاح!';
+                exportMessageText.textContent = 'تم تصدير البيانات بنجاح!';
                 setTimeout(() => {
                     exportMessage.classList.add('d-none');
                     exportModal.hide();
@@ -745,7 +1158,7 @@
             function exportToPdf() {
                 const selectedYear = parseInt(exportYearSelect.value);
                 exportMessage.classList.remove('d-none');
-                exportMessage.textContent = 'جاري تصدير البيانات إلى PDF...';
+                exportMessageText.textContent = 'جاري تصدير البيانات إلى PDF...';
                 
                 // Filter transactions for selected year
                 const yearTransactions = allTransactions.filter(t => {
@@ -754,7 +1167,7 @@
                 });
                 
                 if (yearTransactions.length === 0) {
-                    exportMessage.textContent = 'لا توجد بيانات للتصدير في هذه السنة';
+                    exportMessageText.textContent = 'لا توجد بيانات للتصدير في هذه السنة';
                     setTimeout(() => {
                         exportMessage.classList.add('d-none');
                     }, 3000);
@@ -767,7 +1180,7 @@
                 
                 // Add title
                 doc.setFontSize(20);
-                doc.setTextColor(0, 0, 128); // Blue color
+                doc.setTextColor(78, 115, 223); // Primary color
                 doc.text(`تقرير المصروفات - ${selectedYear}`, 105, 20, null, null, 'center');
                 
                 // Add current date
@@ -806,7 +1219,7 @@
                     head: [['التاريخ', 'التصنيف', 'الوصف', 'المبلغ']],
                     body: tableData,
                     theme: 'grid',
-                    headStyles: { fillColor: [76, 115, 223] }, // Primary color
+                    headStyles: { fillColor: [78, 115, 223] }, // Primary color
                     styles: { font: 'tahoma', fontSize: 10, textColor: [0, 0, 0] },
                     columnStyles: {
                         0: { cellWidth: 40 },
@@ -820,7 +1233,7 @@
                 // Save PDF
                 doc.save(`مصروفات_${selectedYear}.pdf`);
                 
-                exportMessage.textContent = 'تم تصدير البيانات بنجاح!';
+                exportMessageText.textContent = 'تم تصدير البيانات بنجاح!';
                 setTimeout(() => {
                     exportMessage.classList.add('d-none');
                     exportModal.hide();
@@ -837,12 +1250,23 @@
                     return;
                 }
                 
+                // Show loading state
+                loginText.textContent = 'جاري تسجيل الدخول...';
+                loginSpinner.classList.remove('hidden');
+                loginBtn.disabled = true;
+                
                 auth.signInWithEmailAndPassword(email, password)
                     .then(() => {
-                        authMessage.textContent = '';
+                        authMessage.classList.add('d-none');
                     })
                     .catch(error => {
                         showAuthMessage(getAuthErrorMessage(error));
+                    })
+                    .finally(() => {
+                        // Reset button state
+                        loginText.textContent = 'تسجيل الدخول';
+                        loginSpinner.classList.add('hidden');
+                        loginBtn.disabled = false;
                     });
             }
 
@@ -861,12 +1285,23 @@
                     return;
                 }
                 
+                // Show loading state
+                signupText.textContent = 'جاري إنشاء الحساب...';
+                signupSpinner.classList.remove('hidden');
+                signupBtn.disabled = true;
+                
                 auth.createUserWithEmailAndPassword(email, password)
                     .then(() => {
-                        authMessage.textContent = '';
+                        authMessage.classList.add('d-none');
                     })
                     .catch(error => {
                         showAuthMessage(getAuthErrorMessage(error));
+                    })
+                    .finally(() => {
+                        // Reset button state
+                        signupText.textContent = 'إنشاء حساب جديد';
+                        signupSpinner.classList.add('hidden');
+                        signupBtn.disabled = false;
                     });
             }
 
@@ -877,9 +1312,10 @@
 
             // Show auth message
             function showAuthMessage(message) {
-                authMessage.textContent = message;
+                authMessageText.textContent = message;
+                authMessage.classList.remove('d-none');
                 setTimeout(() => {
-                    authMessage.textContent = '';
+                    authMessage.classList.add('d-none');
                 }, 5000);
             }
 
@@ -921,10 +1357,19 @@
                 
                 if (document.body.classList.contains('dark-mode')) {
                     localStorage.setItem('darkMode', 'true');
-                    themeToggle.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                    themeToggle.querySelector('i').classList.replace('bi-moon-fill', 'bi-sun-fill');
+                    themeToggle.setAttribute('data-bs-original-title', 'الوضع الفاتح');
                 } else {
                     localStorage.setItem('darkMode', 'false');
-                    themeToggle.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                    themeToggle.querySelector('i').classList.replace('bi-sun-fill', 'bi-moon-fill');
+                    themeToggle.setAttribute('data-bs-original-title', 'الوضع الداكن');
+                }
+                
+                // Update tooltip
+                const tooltip = bootstrap.Tooltip.getInstance(themeToggle);
+                if (tooltip) {
+                    tooltip.hide();
+                    tooltip._config.title = themeToggle.getAttribute('data-bs-original-title');
                 }
             }
 
@@ -945,7 +1390,7 @@
                 const description = descriptionInput.value;
                 
                 if (!amount || isNaN(amount) || !type || !category || !date) {
-                    alert('الرجاء ملء جميع الحقول المطلوبة');
+                    showNotification('الرجاء ملء جميع الحقول المطلوبة', 'danger');
                     return;
                 }
                 
@@ -961,12 +1406,35 @@
                 // Save transaction to Firebase
                 saveTransaction(transaction);
                 
+                // Show success message
+                showNotification('تم إضافة العملية بنجاح', 'success');
+                
                 // Reset form
                 transactionForm.reset();
                 // Reset date to today
                 const today = new Date();
-                const formattedDate = today.toISOString().substr(0, 10);
+                const formattedDate = today.toISOString().split('T')[0];
                 dateInput.value = formattedDate;
+            }
+
+            // Show notification
+            function showNotification(message, type) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+                notification.style.cssText = 'top: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; max-width: 500px;';
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
             }
 
             // Save transaction to Firebase
@@ -1018,7 +1486,7 @@
                 const description = editDescription.value;
                 
                 if (!amount || isNaN(amount) || !type || !category || !date) {
-                    alert('الرجاء ملء جميع الحقول المطلوبة');
+                    showNotification('الرجاء ملء جميع الحقول المطلوبة', 'danger');
                     return;
                 }
                 
@@ -1042,6 +1510,7 @@
                     })
                     .then(() => {
                         editModal.hide();
+                        showNotification('تم تحديث العملية بنجاح', 'success');
                     });
             }
 
@@ -1059,6 +1528,9 @@
                         const transactions = snapshot.val() || [];
                         const filteredTransactions = transactions.filter(t => t.id != id);
                         return database.ref('users/' + userId + '/transactions').set(filteredTransactions);
+                    })
+                    .then(() => {
+                        showNotification('تم حذف العملية بنجاح', 'success');
                     });
             }
 
@@ -1110,10 +1582,41 @@
                 
                 const balance = incomeTotal - expenseTotal;
                 
+                // Calculate balance change from last month
+                const currentMonth = new Date().getMonth();
+                const lastMonthTransactions = transactions.filter(t => {
+                    const date = new Date(t.date);
+                    return date.getFullYear() === currentYear && date.getMonth() === currentMonth - 1;
+                });
+                
+                const lastMonthIncome = lastMonthTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const lastMonthExpense = lastMonthTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                lastMonthBalance = lastMonthIncome - lastMonthExpense;
+                const balanceChangePercent = lastMonthBalance === 0 ? 0 : ((balance - lastMonthBalance) / Math.abs(lastMonthBalance)) * 100;
+                
+                // Calculate max for progress bars
+                const maxAmount = Math.max(incomeTotal, expenseTotal);
+                const incomeProgressPercent = maxAmount === 0 ? 0 : (incomeTotal / maxAmount) * 100;
+                const expenseProgressPercent = maxAmount === 0 ? 0 : (expenseTotal / maxAmount) * 100;
+                
                 // Update totals display
                 currentBalance.textContent = `${balance.toFixed(2)} ج.م`;
                 totalIncome.textContent = `${incomeTotal.toFixed(2)} ج.م`;
                 totalExpense.textContent = `${expenseTotal.toFixed(2)} ج.م`;
+                
+                // Update balance change
+                balanceChange.textContent = `${balanceChangePercent >= 0 ? '+' : ''}${balanceChangePercent.toFixed(1)}%`;
+                balanceChange.className = `fw-semibold ${balanceChangePercent >= 0 ? 'text-success' : 'text-danger'}`;
+                
+                // Update progress bars
+                incomeProgress.style.width = `${incomeProgressPercent}%`;
+                expenseProgress.style.width = `${expenseProgressPercent}%`;
                 
                 // Render transactions
                 renderTransactions(transactions);
@@ -1139,9 +1642,10 @@
                 transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
                 
                 // Add each transaction to the list
-                transactions.forEach(transaction => {
+                transactions.forEach((transaction, index) => {
                     const row = document.createElement('tr');
-                    row.className = `transaction-item ${transaction.type}-item`;
+                    row.className = `transaction-item ${transaction.type}-item fade-in`;
+                    row.style.animationDelay = `${index * 0.05}s`;
                     
                     // Format date
                     const dateObj = new Date(transaction.date);
@@ -1150,18 +1654,21 @@
                     // Format amount with color based on type
                     const amountClass = transaction.type === 'income' ? 'income' : 'expense';
                     const amountSign = transaction.type === 'income' ? '+' : '-';
+                    const typeBadge = transaction.type === 'income' ? 
+                        '<span class="badge-income">دخل</span>' : 
+                        '<span class="badge-expense">مصروف</span>';
                     
                     row.innerHTML = `
-                        <td>${formattedDate}</td>
+                        <td class="ps-3 fw-semibold">${formattedDate}</td>
                         <td>${transaction.category}</td>
                         <td>${transaction.description || '-'}</td>
-                        <td class="${amountClass}">${amountSign} ${transaction.amount.toFixed(2)} ج.م</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary edit-btn me-2" data-id="${transaction.id}">
-                                <i class="bi bi-pencil"></i>
+                        <td class="${amountClass} fw-bold">${amountSign} ${transaction.amount.toFixed(2)} ج.م</td>
+                        <td class="pe-3 text-center">
+                            <button class="btn btn-sm btn-primary edit-btn me-2" data-id="${transaction.id}" data-bs-toggle="tooltip" title="تعديل">
+                                <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger delete-btn" data-id="${transaction.id}">
-                                <i class="bi bi-trash"></i>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${transaction.id}" data-bs-toggle="tooltip" title="حذف">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     `;
@@ -1183,15 +1690,19 @@
                         deleteTransaction(id);
                     });
                 });
+                
+                // Re-initialize tooltips
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
             }
 
-            // Update charts - Fixed: Set fixed height for containers
+            // Update charts
             function updateCharts(transactions) {
                 updateExpensesChart(transactions);
                 updateMonthlyChart(transactions);
             }
 
-            // Update expenses chart with fixed height
+            // Update expenses chart
             function updateExpensesChart(transactions) {
                 const expenses = transactions.filter(t => t.type === 'expense');
                 
@@ -1241,7 +1752,7 @@
                 
                 // Create new chart with responsive options
                 expensesChart = new Chart(ctx, {
-                    type: 'pie',
+                    type: 'doughnut',
                     data: {
                         labels: labels,
                         datasets: [{
@@ -1270,7 +1781,7 @@
                                 }
                             }
                         },
-                        cutout: '60%',
+                        cutout: '70%',
                         layout: {
                             padding: {
                                 left: 10,
@@ -1283,7 +1794,7 @@
                 });
             }
 
-            // Update monthly chart for selected year with fixed height
+            // Update monthly chart for selected year
             function updateMonthlyChart(transactions) {
                 // Group transactions by month for the selected year
                 const monthlyData = {};
@@ -1350,7 +1861,8 @@
                                 hoverBackgroundColor: '#17a673',
                                 data: incomeData,
                                 barPercentage: 0.7,
-                                categoryPercentage: 0.8
+                                categoryPercentage: 0.8,
+                                borderRadius: 4
                             },
                             {
                                 label: 'المصروفات',
@@ -1358,7 +1870,8 @@
                                 hoverBackgroundColor: '#be2617',
                                 data: expenseData,
                                 barPercentage: 0.7,
-                                categoryPercentage: 0.8
+                                categoryPercentage: 0.8,
+                                borderRadius: 4
                             }
                         ]
                     },
@@ -1402,14 +1915,17 @@
                                 labels: {
                                     font: {
                                         size: 11
-                                    }
+                                    },
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded'
                                 }
                             },
                             title: {
                                 display: true,
                                 text: `إحصائيات عام ${currentYear}`,
                                 font: {
-                                    size: 14
+                                    size: 14,
+                                    weight: 'bold'
                                 }
                             }
                         }
