@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مالي - النسخة المطورة</title>
+    <title>مالي - النسخة النهائية</title>
     
     <!-- Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -114,7 +114,7 @@
             box-shadow: var(--shadow);
         }
         
-        /* IMPROVED: Text Clarity for Stats */
+        /* Text Clarity for Stats */
         .stat-card .card-body h3, .stat-card .card-body h4 {
             font-weight: 700 !important;
             font-size: 1.75rem;
@@ -124,7 +124,7 @@
             font-size: 1.25rem;
         }
         
-        /* IMPROVED: Transaction Item Clarity */
+        /* Transaction Item Clarity */
         .transaction-item .transaction-description {
             color: var(--text-secondary);
             font-size: 0.9rem;
@@ -135,7 +135,7 @@
         }
 
         /* Transactions List */
-        .transactions-container { max-height: 75vh; overflow-y: auto; padding: 0.5rem; }
+        .transactions-container { max-height: 80vh; overflow-y: auto; padding: 0.5rem; }
         .transaction-item {
             display: flex; align-items: center; padding: 1rem; margin-bottom: 0.75rem;
             border-radius: var(--radius); transition: var(--transition); background-color: var(--card-bg);
@@ -150,9 +150,7 @@
 </head>
 <body class="">
 
-    <!-- =================================================================
-    AUTH SCREEN
-    ================================================================== -->
+    <!-- Auth Screen -->
     <div id="authScreen" class="auth-container">
         <div class="auth-card card">
             <div class="card-body p-4 p-md-5">
@@ -189,9 +187,7 @@
         </div>
     </div>
 
-    <!-- =================================================================
-    MAIN APP SCREEN
-    ================================================================== -->
+    <!-- Main App Screen -->
     <div id="appScreen" class="container-fluid py-4 px-lg-5 hidden">
         
         <header class="app-header d-flex justify-content-between align-items-center">
@@ -238,8 +234,19 @@
                         </form>
                     </div>
                 </div>
+                 
+                 <!-- NEW: Expenses by Category Chart -->
+                 <div class="card">
+                    <div class="card-header"><i class="bi bi-pie-chart-fill me-2"></i>توزيع المصروفات (الإجمالي)</div>
+                    <div class="card-body">
+                        <canvas id="expensesByCategoryChart"></canvas>
+                        <div id="noExpenseData" class="text-center py-5 hidden">
+                             <p class="text-secondary">لا توجد مصروفات لعرضها.</p>
+                        </div>
+                    </div>
+                </div>
                 
-                 <!-- NEW: Monthly/Yearly Statistics Card -->
+                 <!-- Monthly/Yearly Statistics Card -->
                  <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div><i class="bi bi-bar-chart-line-fill me-2"></i>الإحصائيات</div>
@@ -256,7 +263,7 @@
 
             <!-- RIGHT COLUMN -->
             <div class="col-lg-7">
-                <div class="card" style="min-height: 95vh;">
+                <div class="card" style="height: 95vh;">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div><i class="bi bi-list-ul me-2"></i>سجل العمليات</div>
                         <div class="d-flex gap-2">
@@ -294,7 +301,6 @@
             measurementId: "G-RTBRP79JDL"
         };
 
-        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
@@ -312,14 +318,15 @@
             const exportBtn = document.getElementById('exportBtn'), exportModal = new bootstrap.Modal(document.getElementById('exportModal'));
             const exportToExcelBtn = document.getElementById('exportToExcelBtn'), exportToPdfBtn = document.getElementById('exportToPdfBtn');
             const editModal = new bootstrap.Modal(document.getElementById('editModal')), editId = document.getElementById('editId'), editAmount = document.getElementById('editAmount'), editType = document.getElementById('editType'), editDate = document.getElementById('editDate'), editDescription = document.getElementById('editDescription'), saveEditBtn = document.getElementById('saveEditBtn');
-            const yearSelect = document.getElementById('yearSelect'); // NEW
-            const noChartData = document.getElementById('noChartData'); // NEW
+            const yearSelect = document.getElementById('yearSelect');
+            const noChartData = document.getElementById('noChartData');
+            const expensesByCategoryChartCanvas = document.getElementById('expensesByCategoryChart');
+            const noExpenseData = document.getElementById('noExpenseData');
 
-            let monthlyChart; // MODIFIED
+            let monthlyChart, expenseByCategoryChart;
             let currentUser, allTransactions = [];
             const incomeCategories = ['راتب', 'هدية', 'استثمار', 'أخرى'], expenseCategories = ['أكل', 'مواصلات', 'تسوق', 'ترفيه', 'فواتير', 'صحة', 'تعليم', 'أخرى'];
             
-            // Initializer Function
             function init() {
                 auth.onAuthStateChanged(user => {
                     if (user) {
@@ -345,7 +352,6 @@
                 new bootstrap.Tooltip(document.getElementById('themeToggle'));
             }
 
-            // Event Listeners
             function setupEventListeners() {
                 loginBtn.addEventListener('click', handleAuth.bind(null, 'login'));
                 signupBtn.addEventListener('click', handleAuth.bind(null, 'signup'));
@@ -366,10 +372,12 @@
                 exportBtn.addEventListener('click', () => exportModal.show());
                 exportToExcelBtn.addEventListener('click', exportData.bind(null, 'excel'));
                 exportToPdfBtn.addEventListener('click', exportData.bind(null, 'pdf'));
-                yearSelect.addEventListener('change', updateMonthlyChart); // NEW
+                yearSelect.addEventListener('change', () => {
+                    updateDashboard();
+                    updateMonthlyChart();
+                });
             }
 
-            // Authentication
             function handleAuth(type, e) {
                 e.preventDefault();
                 const email = authEmail.value, password = authPassword.value;
@@ -386,16 +394,17 @@
                  switch (code) { case 'auth/user-not-found': return 'المستخدم غير موجود.'; case 'auth/wrong-password': return 'كلمة المرور خاطئة.'; case 'auth/invalid-email': return 'البريد الإلكتروني غير صالح.'; case 'auth/email-already-in-use': return 'البريد الإلكتروني مستخدم بالفعل.'; case 'auth/weak-password': return 'كلمة المرور ضعيفة (6 أحرف على الأقل).'; default: return 'حدث خطأ غير متوقع.'; }
             }
 
-            // Firebase Data Handling
             function loadUserData() {
                 database.ref(`users/${currentUser.uid}/transactions`).on('value', snapshot => {
                     allTransactions = [];
                     snapshot.forEach(child => { allTransactions.push({ id: child.key, ...child.val() }); });
                     allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    populateYearFilter();
                     updateDashboard();
                     filterAndRenderTransactions();
-                    populateYearFilter(); // NEW
-                    updateMonthlyChart(); // NEW
+                    updateMonthlyChart();
+                    updateExpensesByCategoryChart();
                 });
             }
             function addTransaction(e) {
@@ -414,7 +423,6 @@
                 database.ref(`users/${currentUser.uid}/transactions/${id}`).update(updatedTransaction).then(() => { editModal.hide(); showNotification('تم التحديث.', 'success'); }).catch(() => showNotification('فشل التحديث.', 'danger'));
             }
             
-            // UI Updates & Rendering
              function filterAndRenderTransactions() {
                 const filterValue = filterType.value, searchValue = searchInput.value.toLowerCase();
                 const filtered = allTransactions.filter(t => (filterValue === 'all' || t.type === filterValue) && (!searchValue || t.category.toLowerCase().includes(searchValue) || t.description.toLowerCase().includes(searchValue) || t.amount.toString().includes(searchValue)));
@@ -448,13 +456,23 @@
                     transactionsList.appendChild(item);
                 });
             }
+            
             function updateDashboard() {
-                const income = allTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-                const expense = allTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+                const selectedYear = yearSelect.value;
+                let transactionsToDisplay = allTransactions;
+
+                if (selectedYear && selectedYear !== 'all') {
+                    transactionsToDisplay = allTransactions.filter(t => new Date(t.date).getFullYear() === parseInt(selectedYear));
+                }
+
+                const income = transactionsToDisplay.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+                const expense = transactionsToDisplay.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
                 currentBalance.textContent = `${(income - expense).toLocaleString()} ج.م`;
                 totalIncome.textContent = `+${income.toLocaleString()} ج.م`;
                 totalExpense.textContent = `-${expense.toLocaleString()} ج.م`;
             }
+
             function updateCategoryOptions(type, isMainForm = true) {
                 const select = isMainForm ? categorySelect : editCategorySelect;
                 select.innerHTML = (type === 'income' ? incomeCategories : expenseCategories).map(c => `<option value="${c}">${c}</option>`).join('');
@@ -465,7 +483,8 @@
                 localStorage.setItem('darkMode', isDarkMode);
                 themeToggle.classList.toggle('bi-moon-stars-fill', !isDarkMode);
                 themeToggle.classList.toggle('bi-sun-fill', isDarkMode);
-                updateMonthlyChart(); // Redraw chart
+                updateMonthlyChart();
+                updateExpensesByCategoryChart();
             }
             function showNotification(message, type = 'info') {
                 const id = 'toast-' + Math.random();
@@ -476,7 +495,6 @@
                 new bootstrap.Toast(toastEl, { delay: 3000 }).show();
             }
 
-            // NEW: Populate Year Filter
             function populateYearFilter() {
                 if(allTransactions.length === 0) { yearSelect.innerHTML = ''; return; }
                 const years = [...new Set(allTransactions.map(t => new Date(t.date).getFullYear()))].sort((a,b) => b - a);
@@ -486,7 +504,6 @@
                 });
             }
             
-            // MODIFIED: Statistics Chart
             function updateMonthlyChart() {
                 const ctx = document.getElementById('monthlyChart').getContext('2d');
                 if (monthlyChart) monthlyChart.destroy();
@@ -495,12 +512,9 @@
                 const isDarkMode = document.body.classList.contains('dark-mode');
                 const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
                 const textColor = isDarkMode ? '#F2F2F7' : '#1D1D1F';
-                let labels, incomeData, expenseData, title;
-
-                let hasData = false;
+                let labels, incomeData, expenseData, title, hasData = false;
 
                 if (selectedYear === 'all') {
-                    // Yearly comparison view
                     const yearlyData = allTransactions.reduce((acc, t) => {
                         const year = new Date(t.date).getFullYear();
                         if (!acc[year]) acc[year] = { income: 0, expense: 0 };
@@ -514,7 +528,6 @@
                     if (labels.length > 0) hasData = true;
 
                 } else {
-                    // Monthly view for a specific year
                     const year = parseInt(selectedYear);
                     const monthlyData = Array(12).fill(null).map(() => ({ income: 0, expense: 0 }));
                     allTransactions.filter(t => new Date(t.date).getFullYear() === year).forEach(t => {
@@ -528,7 +541,6 @@
                     if(incomeData.some(d => d > 0) || expenseData.some(d => d > 0)) hasData = true;
                 }
                 
-                // Show/hide no data message
                 noChartData.classList.toggle('hidden', hasData);
                 document.getElementById('monthlyChart').classList.toggle('hidden', !hasData);
                 if (!hasData) return;
@@ -549,8 +561,46 @@
                     }
                 });
             }
+
+            function updateExpensesByCategoryChart() {
+                const ctx = expensesByCategoryChartCanvas.getContext('2d');
+                if (expenseByCategoryChart) expenseByCategoryChart.destroy();
+
+                const expenses = allTransactions.filter(t => t.type === 'expense');
+                noExpenseData.classList.toggle('hidden', expenses.length > 0);
+                expensesByCategoryChartCanvas.classList.toggle('hidden', expenses.length === 0);
+                if (expenses.length === 0) return;
+
+                const categoryTotals = expenses.reduce((acc, t) => {
+                    acc[t.category] = (acc[t.category] || 0) + t.amount;
+                    return acc;
+                }, {});
+
+                const labels = Object.keys(categoryTotals);
+                const data = Object.values(categoryTotals);
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const textColor = isDarkMode ? '#F2F2F7' : '#1D1D1F';
+
+                expenseByCategoryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: ['#FF3B30', '#FF9500', '#FFCC00', '#AF52DE', '#5AC8FA', '#34C759', '#5856D6', '#8E8E93'],
+                            borderColor: isDarkMode ? '#1E1E1E' : '#FFFFFF',
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Cairo' } } }
+                        }
+                    }
+                });
+            }
             
-            // Data Export
             function exportData(format) {
                 if (allTransactions.length === 0) { showNotification('لا توجد بيانات للتصدير.', 'warning'); return; }
                 const data = allTransactions.map(t => ({ 'التاريخ': new Date(t.date).toLocaleDateString('ar-EG'), 'النوع': t.type === 'income' ? 'دخل' : 'مصروف', 'التصنيف': t.category, 'الوصف': t.description || '-', 'المبلغ': t.amount }));
