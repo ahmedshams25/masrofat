@@ -31,13 +31,13 @@
             --warning-color: #FF9500;
             --info-color: #5AC8FA;
             
-            --text-color: #1D1D1F;
-            --text-light: #6E6E73;
+            --text-primary: #1D1D1F;
+            --text-secondary: #6E6E73;
             --bg-color: #F2F2F7;
             --card-bg: #FFFFFF;
             --border-color: #E5E5EA;
 
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             --radius: 1rem;
             --transition: all 0.3s ease;
             --font-family: 'Cairo', sans-serif;
@@ -46,185 +46,106 @@
         .dark-mode {
             --primary-color: #645DF6;
             --primary-light: #817EF8;
-            --secondary-color: #3A3A3C;
             --success-color: #32D74B;
             --danger-color: #FF453A;
-            --warning-color: #FF9F0A;
-            --info-color: #64D2FF;
-
-            --text-color: #F2F2F7;
-            --text-light: #8E8E93;
-            --bg-color: #1C1C1E;
-            --card-bg: #2C2C2E;
+            --text-primary: #F2F2F7;
+            --text-secondary: #8E8E93;
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
             --border-color: #3A3A3C;
-
             --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
 
         /* Base Styles */
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text-primary);
             font-family: var(--font-family);
             transition: var(--transition);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
-
-        /* Glassmorphism Effect */
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .dark-mode .glass-effect {
-            background: rgba(44, 44, 46, 0.5);
-            border: 1px solid rgba(58, 58, 60, 0.5);
-        }
-
+        
         /* Card Styles */
         .card {
             background-color: var(--card-bg);
-            border: none;
+            border: 1px solid var(--border-color);
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            box-shadow: none;
             transition: var(--transition);
             margin-bottom: 1.5rem;
         }
         .card:hover {
-            transform: translateY(-5px);
+             border-color: var(--primary-color);
         }
-
         .card-header {
             background-color: transparent;
             border-bottom: 1px solid var(--border-color);
             font-weight: 700;
             padding: 1rem 1.5rem;
         }
-
+        
         /* Form Styles */
         .form-control, .form-select {
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text-primary);
             border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            transition: var(--transition);
         }
         .form-control:focus, .form-select:focus {
             background-color: var(--card-bg);
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color), 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(var(--primary-color), 0.25);
         }
-
+        
         /* Button Styles */
-        .btn {
-            border-radius: 0.75rem;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        .btn-primary:hover {
-            background-color: var(--primary-light);
-            border-color: var(--primary-light);
-            transform: scale(1.03);
-        }
-
+        .btn { border-radius: 0.75rem; font-weight: 600; }
+        .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
+        .btn-primary:hover { background-color: var(--primary-light); border-color: var(--primary-light); }
+        
         /* Auth Screen Styles */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--bg-color) 0%, var(--border-color) 100%);
-        }
-        .auth-card {
-            width: 100%;
-            max-width: 420px;
-            overflow: hidden;
-            border: none;
-        }
-        .dark-mode .auth-container {
-             background: linear-gradient(135deg, var(--bg-color) 0%, #000 100%);
-        }
-
+        .auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .auth-card { width: 100%; max-width: 420px; }
+        
         /* App Header */
         .app-header {
-            padding: 2rem;
+            padding: 1.5rem 2rem;
             border-radius: var(--radius);
             margin-bottom: 2rem;
             color: white;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            box-shadow: var(--shadow);
         }
         
-        /* Stats Cards */
-        .stat-card {
-            border-radius: var(--radius);
-            position: relative;
-            overflow: hidden;
+        /* IMPROVED: Text Clarity for Stats */
+        .stat-card .card-body h3, .stat-card .card-body h4 {
+            font-weight: 700 !important;
+            font-size: 1.75rem;
         }
-        .stat-icon {
-            font-size: 2.5rem;
-            opacity: 0.1;
-            position: absolute;
-            right: 20px;
-            bottom: -10px;
-            transform: rotate(-15deg);
+        .stat-card .card-body h5 {
+            font-weight: 700 !important;
+            font-size: 1.25rem;
+        }
+        
+        /* IMPROVED: Transaction Item Clarity */
+        .transaction-item .transaction-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .transaction-item .transaction-date {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
         }
 
         /* Transactions List */
-        .transactions-container {
-            max-height: 75vh;
-            overflow-y: auto;
-            padding: 0.5rem;
-        }
+        .transactions-container { max-height: 75vh; overflow-y: auto; padding: 0.5rem; }
         .transaction-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            border-radius: var(--radius);
-            transition: var(--transition);
-            background-color: var(--card-bg);
-            border-left: 5px solid;
+            display: flex; align-items: center; padding: 1rem; margin-bottom: 0.75rem;
+            border-radius: var(--radius); transition: var(--transition); background-color: var(--card-bg);
+            border: 1px solid var(--border-color); border-right: 5px solid;
         }
-        .transaction-item.income-item { border-left-color: var(--success-color); }
-        .transaction-item.expense-item { border-left-color: var(--danger-color); }
-        .transaction-item:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-
-        /* Theme Toggle Button */
-        .theme-toggle {
-            cursor: pointer;
-            font-size: 1.5rem;
-        }
+        .transaction-item.income-item { border-right-color: var(--success-color); }
+        .transaction-item.expense-item { border-right-color: var(--danger-color); }
         
         .hidden { display: none !important; }
-        .spinner {
-            width: 1rem;
-            height: 1rem;
-            border-width: .2em;
-        }
-
-        /* General Improvements */
         .fw-600 { font-weight: 600; }
-        .text-success { color: var(--success-color) !important; }
-        .text-danger { color: var(--danger-color) !important; }
-        .badge {
-            font-size: 0.75rem;
-            padding: 0.4em 0.8em;
-            font-weight: 600;
-        }
-        .badge-income { background-color: rgba(var(--success-color), 0.1); color: var(--success-color); }
-        .badge-expense { background-color: rgba(var(--danger-color), 0.1); color: var(--danger-color); }
-
     </style>
 </head>
 <body class="">
@@ -233,33 +154,33 @@
     AUTH SCREEN
     ================================================================== -->
     <div id="authScreen" class="auth-container">
-        <div class="auth-card card glass-effect">
+        <div class="auth-card card">
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
                     <i class="fa-solid fa-wallet fs-1 text-primary mb-3"></i>
                     <h2 class="fw-bold">أهلاً بك في مالي</h2>
-                    <p class="text-light">نسختك المطورة لتتبع أموالك بذكاء</p>
+                    <p class="text-secondary">لتتبع أموالك بذكاء</p>
                 </div>
                 <form id="authForm">
                     <div class="mb-3">
                         <label for="authEmail" class="form-label fw-600">البريد الإلكتروني</label>
-                        <input type="email" class="form-control" id="authEmail" placeholder="example@email.com" required>
+                        <input type="email" class="form-control" id="authEmail" required>
                     </div>
                     <div class="mb-4">
                         <label for="authPassword" class="form-label fw-600">كلمة المرور</label>
                         <div class="input-group">
-                             <input type="password" class="form-control" id="authPassword" placeholder="••••••••" required>
+                             <input type="password" class="form-control" id="authPassword" required>
                              <button type="button" class="input-group-text bg-transparent" id="togglePassword"><i class="bi bi-eye"></i></button>
                         </div>
                     </div>
                     <div class="d-grid gap-2 mb-3">
                         <button type="button" id="loginBtn" class="btn btn-primary btn-lg">
                             <span id="loginText">تسجيل الدخول</span>
-                            <span id="loginSpinner" class="spinner-border spinner-border-sm ms-2 hidden" role="status" aria-hidden="true"></span>
+                            <span id="loginSpinner" class="spinner-border spinner-border-sm ms-2 hidden" role="status"></span>
                         </button>
                         <button type="button" id="signupBtn" class="btn btn-outline-primary btn-lg">
                             <span id="signupText">إنشاء حساب</span>
-                             <span id="signupSpinner" class="spinner-border spinner-border-sm ms-2 hidden" role="status" aria-hidden="true"></span>
+                             <span id="signupSpinner" class="spinner-border spinner-border-sm ms-2 hidden" role="status"></span>
                         </button>
                     </div>
                     <div id="authMessage" class="alert alert-danger text-center p-2 d-none"></div>
@@ -273,36 +194,33 @@
     ================================================================== -->
     <div id="appScreen" class="container-fluid py-4 px-lg-5 hidden">
         
-        <!-- App Header -->
         <header class="app-header d-flex justify-content-between align-items-center">
             <div>
                 <h3 class="fw-bold mb-0">لوحة التحكم</h3>
                 <p class="mb-0" id="userEmail">مرحباً بك</p>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <i class="theme-toggle bi bi-moon-stars-fill" id="themeToggle" data-bs-toggle="tooltip" title="تبديل السمة"></i>
+                <i class="theme-toggle bi bi-moon-stars-fill fs-4" id="themeToggle" data-bs-toggle="tooltip" title="تبديل السمة"></i>
                 <button id="logoutBtn" class="btn btn-light btn-sm fw-600"><i class="bi bi-box-arrow-right me-2"></i>خروج</button>
             </div>
         </header>
 
         <div class="row g-4">
-            <!-- LEFT COLUMN (Forms & Charts) -->
+            <!-- LEFT COLUMN -->
             <div class="col-lg-5">
-                <!-- Stats Cards -->
                 <div class="row">
-                    <div class="col-12"><div class="stat-card card"><div class="card-body"><p class="text-light fw-600 mb-1">الرصيد الحالي</p><h3 class="fw-bold" id="currentBalance">0 ج.م</h3><div class="stat-icon"><i class="bi bi-wallet2"></i></div></div></div></div>
-                    <div class="col-6"><div class="stat-card card"><div class="card-body"><p class="text-light fw-600 mb-1">إجمالي الدخل</p><h5 class="fw-bold text-success" id="totalIncome">0 ج.م</h5><div class="stat-icon"><i class="bi bi-arrow-down-circle"></i></div></div></div></div>
-                    <div class="col-6"><div class="stat-card card"><div class="card-body"><p class="text-light fw-600 mb-1">إجمالي المصروفات</p><h5 class="fw-bold text-danger" id="totalExpense">0 ج.م</h5><div class="stat-icon"><i class="bi bi-arrow-up-circle"></i></div></div></div></div>
+                    <div class="col-12"><div class="stat-card card"><div class="card-body"><p class="text-secondary fw-600 mb-1">الرصيد الحالي</p><h3 id="currentBalance">0 ج.م</h3></div></div></div>
+                    <div class="col-6"><div class="stat-card card"><div class="card-body"><p class="text-secondary fw-600 mb-1">إجمالي الدخل</p><h5 class="text-success" id="totalIncome">0 ج.م</h5></div></div></div>
+                    <div class="col-6"><div class="stat-card card"><div class="card-body"><p class="text-secondary fw-600 mb-1">إجمالي المصروفات</p><h5 class="text-danger" id="totalExpense">0 ج.م</h5></div></div></div>
                 </div>
 
-                <!-- Add Transaction Card -->
                 <div class="card">
                     <div class="card-header"><i class="bi bi-plus-circle-fill me-2"></i>إضافة عملية جديدة</div>
                     <div class="card-body">
                         <form id="transactionForm">
                             <div class="mb-3">
                                 <label for="amount" class="form-label fw-600">المبلغ</label>
-                                <input type="number" class="form-control" id="amount" required step="0.01" min="0.01" placeholder="0.00">
+                                <input type="number" class="form-control" id="amount" required step="0.01" min="0.01">
                             </div>
                              <div class="row mb-3">
                                 <div class="col-6"><label for="type" class="form-label fw-600">النوع</label><select class="form-select" id="type" required><option value="expense">مصروف</option><option value="income">دخل</option></select></div>
@@ -314,42 +232,44 @@
                             </div>
                             <div class="mb-3">
                                 <label for="description" class="form-label fw-600">الوصف (اختياري)</label>
-                                <input type="text" class="form-control" id="description" placeholder="مثال: فاتورة كهرباء">
+                                <input type="text" class="form-control" id="description">
                             </div>
                             <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-circle me-2"></i>إضافة</button>
                         </form>
                     </div>
                 </div>
                 
-                 <!-- Charts -->
+                 <!-- NEW: Monthly/Yearly Statistics Card -->
                  <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <div><i class="bi bi-pie-chart-fill me-2"></i>توزيع المصروفات</div>
-                        <button id="exportExpensesBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-download me-1"></i> تصدير</button>
+                        <div><i class="bi bi-bar-chart-line-fill me-2"></i>الإحصائيات</div>
+                        <select id="yearSelect" class="form-select form-select-sm" style="width: 120px;"></select>
                     </div>
-                    <div class="card-body"><canvas id="expensesChart"></canvas></div>
+                    <div class="card-body">
+                        <canvas id="monthlyChart"></canvas>
+                        <div id="noChartData" class="text-center py-5 hidden">
+                             <p class="text-secondary">لا توجد بيانات لعرضها.</p>
+                        </div>
+                    </div>
                 </div>
-
             </div>
 
-            <!-- RIGHT COLUMN (Transactions) -->
+            <!-- RIGHT COLUMN -->
             <div class="col-lg-7">
-                <div class="card">
+                <div class="card" style="min-height: 95vh;">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div><i class="bi bi-list-ul me-2"></i>سجل العمليات</div>
                         <div class="d-flex gap-2">
                              <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="ابحث هنا...">
                              <select id="filterType" class="form-select form-select-sm"><option value="all">الكل</option><option value="income">الدخل</option><option value="expense">المصروفات</option></select>
+                             <button id="exportBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-download"></i></button>
                         </div>
                     </div>
                     <div class="card-body">
-                         <div id="transactionsList" class="transactions-container">
-                            <!-- Transactions will be added here -->
-                         </div>
+                         <div id="transactionsList" class="transactions-container"></div>
                          <div id="noTransactions" class="text-center py-5">
-                            <i class="bi bi-journal-x fs-1 text-light mb-3"></i>
+                            <i class="bi bi-journal-x fs-1 text-secondary mb-3"></i>
                             <h5 class="fw-bold">لا توجد عمليات بعد</h5>
-                            <p class="text-light">ابدأ بإضافة أول عملية مالية لك!</p>
                         </div>
                     </div>
                 </div>
@@ -357,49 +277,13 @@
         </div>
     </div>
     
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>تعديل العملية</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                     <form id="editForm">
-                        <input type="hidden" id="editId">
-                        <div class="mb-3"><label for="editAmount" class="form-label fw-600">المبلغ</label><input type="number" class="form-control" id="editAmount" required></div>
-                        <div class="row mb-3">
-                            <div class="col-6"><label for="editType" class="form-label fw-600">النوع</label><select class="form-select" id="editType" required><option value="expense">مصروف</option><option value="income">دخل</option></select></div>
-                            <div class="col-6"><label for="editCategory" class="form-label fw-600">التصنيف</label><select class="form-select" id="editCategory" required></select></div>
-                        </div>
-                        <div class="mb-3"><label for="editDate" class="form-label fw-600">التاريخ</label><input type="date" class="form-control" id="editDate" required></div>
-                        <div class="mb-3"><label for="editDescription" class="form-label fw-600">الوصف</label><input type="text" class="form-control" id="editDescription"></div>
-                    </form>
-                </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="button" id="saveEditBtn" class="btn btn-primary"><i class="bi bi-save me-2"></i>حفظ</button></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Export Modal -->
-    <div class="modal fade" id="exportModal" tabindex="-1">
-         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title fw-bold"><i class="bi bi-download me-2"></i>تصدير البيانات</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body text-center">
-                    <p class="fw-600">اختر الصيغة التي ترغب في تصدير بيانات المصروفات بها.</p>
-                     <div class="d-grid gap-2 mt-4">
-                        <button id="exportToExcelBtn" class="btn btn-success btn-lg"><i class="bi bi-file-earmark-excel-fill me-2"></i>تصدير إلى Excel</button>
-                        <button id="exportToPdfBtn" class="btn btn-danger btn-lg"><i class="bi bi-file-earmark-pdf-fill me-2"></i>تصدير إلى PDF</button>
-                    </div>
-                    <div id="exportMessage" class="alert alert-info mt-3 d-none"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Modals (Edit, Export) -->
+    <div class="modal fade" id="editModal" tabindex="-1"> <div class="modal-dialog modal-dialog-centered"> <div class="modal-content"> <div class="modal-header"><h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>تعديل العملية</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div> <div class="modal-body"> <form id="editForm"> <input type="hidden" id="editId"> <div class="mb-3"><label for="editAmount" class="form-label fw-600">المبلغ</label><input type="number" class="form-control" id="editAmount" required></div> <div class="row mb-3"> <div class="col-6"><label for="editType" class="form-label fw-600">النوع</label><select class="form-select" id="editType" required><option value="expense">مصروف</option><option value="income">دخل</option></select></div> <div class="col-6"><label for="editCategory" class="form-label fw-600">التصنيف</label><select class="form-select" id="editCategory" required></select></div> </div> <div class="mb-3"><label for="editDate" class="form-label fw-600">التاريخ</label><input type="date" class="form-control" id="editDate" required></div> <div class="mb-3"><label for="editDescription" class="form-label fw-600">الوصف</label><input type="text" class="form-control" id="editDescription"></div> </form> </div> <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="button" id="saveEditBtn" class="btn btn-primary"><i class="bi bi-save me-2"></i>حفظ</button></div> </div> </div> </div>
+    <div class="modal fade" id="exportModal" tabindex="-1"> <div class="modal-dialog modal-dialog-centered"> <div class="modal-content"> <div class="modal-header"><h5 class="modal-title fw-bold"><i class="bi bi-download me-2"></i>تصدير البيانات</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div> <div class="modal-body text-center"> <p class="fw-600">تصدير بيانات المصروفات والدخل.</p> <div class="d-grid gap-2 mt-4"> <button id="exportToExcelBtn" class="btn btn-success btn-lg"><i class="bi bi-file-earmark-excel-fill me-2"></i>Excel</button> <button id="exportToPdfBtn" class="btn btn-danger btn-lg"><i class="bi bi-file-earmark-pdf-fill me-2"></i>PDF</button> </div> </div> </div> </div> </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Your existing Firebase configuration
+        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBbYerrLcTE4o44bsBXPynHQ6ArXvtyEro",
             authDomain: "masrofat-c544f.firebaseapp.com",
@@ -416,60 +300,27 @@
         const database = firebase.database();
 
         document.addEventListener('DOMContentLoaded', () => {
-            // =================================================================
             // DOM Elements
-            // =================================================================
-            const authScreen = document.getElementById('authScreen');
-            const appScreen = document.getElementById('appScreen');
-            const authForm = document.getElementById('authForm');
-            const authEmail = document.getElementById('authEmail');
-            const authPassword = document.getElementById('authPassword');
-            const togglePassword = document.getElementById('togglePassword');
-            const loginBtn = document.getElementById('loginBtn');
-            const signupBtn = document.getElementById('signupBtn');
-            const authMessage = document.getElementById('authMessage');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const userEmail = document.getElementById('userEmail');
-            const themeToggle = document.getElementById('themeToggle');
+            const authScreen = document.getElementById('authScreen'), appScreen = document.getElementById('appScreen');
+            const authForm = document.getElementById('authForm'), authEmail = document.getElementById('authEmail'), authPassword = document.getElementById('authPassword'), togglePassword = document.getElementById('togglePassword');
+            const loginBtn = document.getElementById('loginBtn'), signupBtn = document.getElementById('signupBtn'), authMessage = document.getElementById('authMessage');
+            const logoutBtn = document.getElementById('logoutBtn'), userEmail = document.getElementById('userEmail'), themeToggle = document.getElementById('themeToggle');
+            const transactionForm = document.getElementById('transactionForm'), transactionsList = document.getElementById('transactionsList'), noTransactions = document.getElementById('noTransactions');
+            const currentBalance = document.getElementById('currentBalance'), totalIncome = document.getElementById('totalIncome'), totalExpense = document.getElementById('totalExpense');
+            const searchInput = document.getElementById('searchInput'), filterType = document.getElementById('filterType');
+            const categorySelect = document.getElementById('category'), editCategorySelect = document.getElementById('editCategory');
+            const exportBtn = document.getElementById('exportBtn'), exportModal = new bootstrap.Modal(document.getElementById('exportModal'));
+            const exportToExcelBtn = document.getElementById('exportToExcelBtn'), exportToPdfBtn = document.getElementById('exportToPdfBtn');
+            const editModal = new bootstrap.Modal(document.getElementById('editModal')), editId = document.getElementById('editId'), editAmount = document.getElementById('editAmount'), editType = document.getElementById('editType'), editDate = document.getElementById('editDate'), editDescription = document.getElementById('editDescription'), saveEditBtn = document.getElementById('saveEditBtn');
+            const yearSelect = document.getElementById('yearSelect'); // NEW
+            const noChartData = document.getElementById('noChartData'); // NEW
+
+            let monthlyChart; // MODIFIED
+            let currentUser, allTransactions = [];
+            const incomeCategories = ['راتب', 'هدية', 'استثمار', 'أخرى'], expenseCategories = ['أكل', 'مواصلات', 'تسوق', 'ترفيه', 'فواتير', 'صحة', 'تعليم', 'أخرى'];
             
-            const transactionForm = document.getElementById('transactionForm');
-            const transactionsList = document.getElementById('transactionsList');
-            const noTransactions = document.getElementById('noTransactions');
-            const currentBalance = document.getElementById('currentBalance');
-            const totalIncome = document.getElementById('totalIncome');
-            const totalExpense = document.getElementById('totalExpense');
-            const searchInput = document.getElementById('searchInput');
-            const filterType = document.getElementById('filterType');
-
-            const categorySelect = document.getElementById('category');
-            const editCategorySelect = document.getElementById('editCategory');
-
-            const exportExpensesBtn = document.getElementById('exportExpensesBtn');
-            const exportModal = new bootstrap.Modal(document.getElementById('exportModal'));
-            const exportToExcelBtn = document.getElementById('exportToExcelBtn');
-            const exportToPdfBtn = document.getElementById('exportToPdfBtn');
-            const exportMessage = document.getElementById('exportMessage');
-
-            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
-            const editId = document.getElementById('editId');
-            const editAmount = document.getElementById('editAmount');
-            const editType = document.getElementById('editType');
-            const editDate = document.getElementById('editDate');
-            const editDescription = document.getElementById('editDescription');
-            const saveEditBtn = document.getElementById('saveEditBtn');
-
-            let expensesChart;
-            let currentUser;
-            let allTransactions = [];
-
-            const incomeCategories = ['راتب', 'هدية', 'استثمار', 'أخرى'];
-            const expenseCategories = ['أكل', 'مواصلات', 'تسوق', 'ترفيه', 'فواتير', 'صحة', 'تعليم', 'أخرى'];
-            
-            // =================================================================
             // Initializer Function
-            // =================================================================
             function init() {
-                // Check auth state
                 auth.onAuthStateChanged(user => {
                     if (user) {
                         currentUser = user;
@@ -484,32 +335,17 @@
                         authForm.reset();
                     }
                 });
-
-                // Load theme preference
                 if (localStorage.getItem('darkMode') === 'true') {
                     document.body.classList.add('dark-mode');
                     themeToggle.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
                 }
-
-                // Set default date to today
                 document.getElementById('date').value = new Date().toISOString().split('T')[0];
-
-                // Populate initial categories
                 updateCategoryOptions(document.getElementById('type').value);
-
-                // Add Event Listeners
                 setupEventListeners();
-                
-                // Init tooltips
-                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl)
-                });
+                new bootstrap.Tooltip(document.getElementById('themeToggle'));
             }
 
-            // =================================================================
             // Event Listeners
-            // =================================================================
             function setupEventListeners() {
                 loginBtn.addEventListener('click', handleAuth.bind(null, 'login'));
                 signupBtn.addEventListener('click', handleAuth.bind(null, 'signup'));
@@ -527,359 +363,218 @@
                 searchInput.addEventListener('input', () => filterAndRenderTransactions());
                 filterType.addEventListener('change', () => filterAndRenderTransactions());
                 saveEditBtn.addEventListener('click', saveEditedTransaction);
-                exportExpensesBtn.addEventListener('click', () => exportModal.show());
-                exportToExcelBtn.addEventListener('click', exportToExcel);
-                exportToPdfBtn.addEventListener('click', exportToPdf);
+                exportBtn.addEventListener('click', () => exportModal.show());
+                exportToExcelBtn.addEventListener('click', exportData.bind(null, 'excel'));
+                exportToPdfBtn.addEventListener('click', exportData.bind(null, 'pdf'));
+                yearSelect.addEventListener('change', updateMonthlyChart); // NEW
             }
 
-            // =================================================================
             // Authentication
-            // =================================================================
             function handleAuth(type, e) {
                 e.preventDefault();
-                const email = authEmail.value;
-                const password = authPassword.value;
-
-                if (!email || !password) {
-                    showAuthMessage('الرجاء ملء جميع الحقول');
-                    return;
-                }
-                
+                const email = authEmail.value, password = authPassword.value;
+                if (!email || !password) { showAuthMessage('الرجاء ملء جميع الحقول'); return; }
                 const btn = type === 'login' ? loginBtn : signupBtn;
-                const spinner = btn.querySelector('.spinner-border');
-                const text = btn.querySelector('span');
-                const originalText = text.textContent;
-
-                // Show spinner
+                const spinner = btn.querySelector('.spinner-border'), text = btn.querySelector('span'), originalText = text.textContent;
                 text.textContent = type === 'login' ? 'جاري الدخول...' : 'جاري الإنشاء...';
-                spinner.classList.remove('hidden');
-                btn.disabled = true;
-
-                const promise = type === 'login' 
-                    ? auth.signInWithEmailAndPassword(email, password)
-                    : auth.createUserWithEmailAndPassword(email, password);
-
-                promise.catch(error => showAuthMessage(getAuthErrorMessage(error.code)))
-                       .finally(() => {
-                            // Hide spinner
-                            text.textContent = originalText;
-                            spinner.classList.add('hidden');
-                            btn.disabled = false;
-                       });
+                spinner.classList.remove('hidden'); btn.disabled = true;
+                const promise = type === 'login' ? auth.signInWithEmailAndPassword(email, password) : auth.createUserWithEmailAndPassword(email, password);
+                promise.catch(error => showAuthMessage(getAuthErrorMessage(error.code))).finally(() => { text.textContent = originalText; spinner.classList.add('hidden'); btn.disabled = false; });
             }
-
-            function showAuthMessage(message) {
-                authMessage.textContent = message;
-                authMessage.classList.remove('d-none');
-                setTimeout(() => authMessage.classList.add('d-none'), 3000);
-            }
-
+            function showAuthMessage(message) { authMessage.textContent = message; authMessage.classList.remove('d-none'); setTimeout(() => authMessage.classList.add('d-none'), 3000); }
             function getAuthErrorMessage(code) {
-                 switch (code) {
-                    case 'auth/user-not-found': return 'المستخدم غير موجود.';
-                    case 'auth/wrong-password': return 'كلمة المرور خاطئة.';
-                    case 'auth/invalid-email': return 'البريد الإلكتروني غير صالح.';
-                    case 'auth/email-already-in-use': return 'البريد الإلكتروني مستخدم بالفعل.';
-                    case 'auth/weak-password': return 'كلمة المرور ضعيفة (6 أحرف على الأقل).';
-                    default: return 'حدث خطأ غير متوقع.';
-                }
+                 switch (code) { case 'auth/user-not-found': return 'المستخدم غير موجود.'; case 'auth/wrong-password': return 'كلمة المرور خاطئة.'; case 'auth/invalid-email': return 'البريد الإلكتروني غير صالح.'; case 'auth/email-already-in-use': return 'البريد الإلكتروني مستخدم بالفعل.'; case 'auth/weak-password': return 'كلمة المرور ضعيفة (6 أحرف على الأقل).'; default: return 'حدث خطأ غير متوقع.'; }
             }
 
-            // =================================================================
             // Firebase Data Handling
-            // =================================================================
             function loadUserData() {
-                const userRef = database.ref(`users/${currentUser.uid}/transactions`);
-                userRef.on('value', snapshot => {
+                database.ref(`users/${currentUser.uid}/transactions`).on('value', snapshot => {
                     allTransactions = [];
-                    snapshot.forEach(childSnapshot => {
-                        allTransactions.push({ id: childSnapshot.key, ...childSnapshot.val() });
-                    });
+                    snapshot.forEach(child => { allTransactions.push({ id: child.key, ...child.val() }); });
                     allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
                     updateDashboard();
                     filterAndRenderTransactions();
+                    populateYearFilter(); // NEW
+                    updateMonthlyChart(); // NEW
                 });
             }
-
             function addTransaction(e) {
                 e.preventDefault();
-                const newTransaction = {
-                    amount: parseFloat(document.getElementById('amount').value),
-                    type: document.getElementById('type').value,
-                    category: categorySelect.value,
-                    date: document.getElementById('date').value,
-                    description: document.getElementById('description').value
-                };
-
-                if (!newTransaction.amount || !newTransaction.type || !newTransaction.category || !newTransaction.date) {
-                    showNotification('الرجاء ملء الحقول المطلوبة.', 'danger');
-                    return;
-                }
-                database.ref(`users/${currentUser.uid}/transactions`).push(newTransaction)
-                    .then(() => {
-                        showNotification('تمت إضافة العملية بنجاح!', 'success');
-                        transactionForm.reset();
-                        document.getElementById('date').value = new Date().toISOString().split('T')[0];
-                        updateCategoryOptions('expense');
-                    })
-                    .catch(() => showNotification('فشل في إضافة العملية.', 'danger'));
+                const newTransaction = { amount: parseFloat(document.getElementById('amount').value), type: document.getElementById('type').value, category: categorySelect.value, date: document.getElementById('date').value, description: document.getElementById('description').value };
+                if (!newTransaction.amount || !newTransaction.type || !newTransaction.category || !newTransaction.date) { showNotification('الرجاء ملء الحقول المطلوبة.', 'danger'); return; }
+                database.ref(`users/${currentUser.uid}/transactions`).push(newTransaction).then(() => { showNotification('تمت إضافة العملية بنجاح!', 'success'); transactionForm.reset(); document.getElementById('date').value = new Date().toISOString().split('T')[0]; updateCategoryOptions('expense'); }).catch(() => showNotification('فشل في إضافة العملية.', 'danger'));
             }
-            
-            function deleteTransaction(id) {
-                if (confirm('هل أنت متأكد من رغبتك في حذف هذه العملية؟')) {
-                     database.ref(`users/${currentUser.uid}/transactions/${id}`).remove()
-                        .then(() => showNotification('تم الحذف بنجاح.', 'warning'))
-                        .catch(() => showNotification('فشل الحذف.', 'danger'));
-                }
-            }
-            
+            function deleteTransaction(id) { if (confirm('هل أنت متأكد من الحذف؟')) { database.ref(`users/${currentUser.uid}/transactions/${id}`).remove().then(() => showNotification('تم الحذف.', 'warning')).catch(() => showNotification('فشل الحذف.', 'danger')); } }
             function editTransaction(id) {
                 const transaction = allTransactions.find(t => t.id === id);
-                if (transaction) {
-                    editId.value = id;
-                    editAmount.value = transaction.amount;
-                    editType.value = transaction.type;
-                    updateCategoryOptions(transaction.type, false);
-                    editCategorySelect.value = transaction.category;
-                    editDate.value = transaction.date;
-                    editDescription.value = transaction.description;
-                    editModal.show();
-                }
+                if (transaction) { editId.value = id; editAmount.value = transaction.amount; editType.value = transaction.type; updateCategoryOptions(transaction.type, false); editCategorySelect.value = transaction.category; editDate.value = transaction.date; editDescription.value = transaction.description; editModal.show(); }
             }
-
             function saveEditedTransaction() {
-                const id = editId.value;
-                const updatedTransaction = {
-                    amount: parseFloat(editAmount.value),
-                    type: editType.value,
-                    category: editCategorySelect.value,
-                    date: editDate.value,
-                    description: editDescription.value
-                };
-                 database.ref(`users/${currentUser.uid}/transactions/${id}`).update(updatedTransaction)
-                    .then(() => {
-                        editModal.hide();
-                        showNotification('تم التحديث بنجاح.', 'success');
-                    })
-                    .catch(() => showNotification('فشل التحديث.', 'danger'));
+                const id = editId.value, updatedTransaction = { amount: parseFloat(editAmount.value), type: editType.value, category: editCategorySelect.value, date: editDate.value, description: editDescription.value };
+                database.ref(`users/${currentUser.uid}/transactions/${id}`).update(updatedTransaction).then(() => { editModal.hide(); showNotification('تم التحديث.', 'success'); }).catch(() => showNotification('فشل التحديث.', 'danger'));
             }
             
-            // =================================================================
             // UI Updates & Rendering
-            // =================================================================
              function filterAndRenderTransactions() {
-                const filterValue = filterType.value;
-                const searchValue = searchInput.value.toLowerCase();
-                
-                const filtered = allTransactions.filter(t => {
-                    const typeMatch = filterValue === 'all' || t.type === filterValue;
-                    const searchMatch = !searchValue || 
-                                        t.category.toLowerCase().includes(searchValue) ||
-                                        t.description.toLowerCase().includes(searchValue) ||
-                                        t.amount.toString().includes(searchValue);
-                    return typeMatch && searchMatch;
-                });
-
+                const filterValue = filterType.value, searchValue = searchInput.value.toLowerCase();
+                const filtered = allTransactions.filter(t => (filterValue === 'all' || t.type === filterValue) && (!searchValue || t.category.toLowerCase().includes(searchValue) || t.description.toLowerCase().includes(searchValue) || t.amount.toString().includes(searchValue)));
                 renderTransactions(filtered);
             }
-
             function renderTransactions(transactions) {
                 transactionsList.innerHTML = '';
-                if (transactions.length === 0) {
-                    noTransactions.classList.remove('hidden');
-                    transactionsList.classList.add('hidden');
-                    return;
-                }
-                
-                noTransactions.classList.add('hidden');
-                transactionsList.classList.remove('hidden');
-
+                if (transactions.length === 0) { noTransactions.classList.remove('hidden'); transactionsList.classList.add('hidden'); return; }
+                noTransactions.classList.add('hidden'); transactionsList.classList.remove('hidden');
                 transactions.forEach(t => {
                     const item = document.createElement('div');
                     item.className = `transaction-item ${t.type}-item`;
                     const sign = t.type === 'income' ? '+' : '-';
-                    const badgeClass = t.type === 'income' ? 'badge-income' : 'badge-expense';
-
                     item.innerHTML = `
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between">
                                 <span class="fw-bold">${t.category}</span>
                                 <span class="fw-bold text-${t.type === 'income' ? 'success' : 'danger'}">${sign}${t.amount.toLocaleString()} ج.م</span>
                             </div>
-                            <div class="d-flex justify-content-between text-light small mt-1">
-                                <span>${t.description || 'لا يوجد وصف'}</span>
-                                <span>${new Date(t.date).toLocaleDateString('ar-EG')}</span>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="transaction-description">${t.description || 'لا يوجد وصف'}</span>
+                                <span class="transaction-date">${new Date(t.date).toLocaleDateString('ar-EG')}</span>
                             </div>
                         </div>
-                        <div class="ms-3">
-                           <button class="btn btn-sm btn-outline-secondary edit-btn"><i class="bi bi-pencil"></i></button>
-                           <button class="btn btn-sm btn-outline-danger delete-btn"><i class="bi bi-trash"></i></button>
-                        </div>
-                    `;
+                        <div class="ms-3 d-flex flex-column gap-1">
+                           <button class="btn btn-sm btn-outline-secondary edit-btn py-1 px-2"><i class="bi bi-pencil"></i></button>
+                           <button class="btn btn-sm btn-outline-danger delete-btn py-1 px-2"><i class="bi bi-trash"></i></button>
+                        </div>`;
                     item.querySelector('.delete-btn').addEventListener('click', () => deleteTransaction(t.id));
                     item.querySelector('.edit-btn').addEventListener('click', () => editTransaction(t.id));
-
                     transactionsList.appendChild(item);
                 });
             }
-
             function updateDashboard() {
-                const income = allTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-                const expense = allTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-                const balance = income - expense;
-
-                currentBalance.textContent = `${balance.toLocaleString()} ج.م`;
+                const income = allTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+                const expense = allTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+                currentBalance.textContent = `${(income - expense).toLocaleString()} ج.م`;
                 totalIncome.textContent = `+${income.toLocaleString()} ج.م`;
                 totalExpense.textContent = `-${expense.toLocaleString()} ج.م`;
-                
-                updateExpensesChart();
             }
-            
             function updateCategoryOptions(type, isMainForm = true) {
                 const select = isMainForm ? categorySelect : editCategorySelect;
-                const categories = type === 'income' ? incomeCategories : expenseCategories;
-                select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+                select.innerHTML = (type === 'income' ? incomeCategories : expenseCategories).map(c => `<option value="${c}">${c}</option>`).join('');
             }
-            
             function toggleTheme() {
                 document.body.classList.toggle('dark-mode');
                 const isDarkMode = document.body.classList.contains('dark-mode');
                 localStorage.setItem('darkMode', isDarkMode);
                 themeToggle.classList.toggle('bi-moon-stars-fill', !isDarkMode);
                 themeToggle.classList.toggle('bi-sun-fill', isDarkMode);
-                updateExpensesChart(); // Redraw chart for new theme colors
+                updateMonthlyChart(); // Redraw chart
             }
-
             function showNotification(message, type = 'info') {
-                const toastContainer = document.querySelector('.toast-container') || document.createElement('div');
-                if (!document.querySelector('.toast-container')) {
-                    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-                    document.body.appendChild(toastContainer);
-                }
-
-                const toastEl = document.createElement('div');
-                toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
-                toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-                
-                toastContainer.appendChild(toastEl);
-                const toast = new bootstrap.Toast(toastEl);
-                toast.show();
+                const id = 'toast-' + Math.random();
+                const toast = `<div id="${id}" class="toast align-items-center text-white bg-${type} border-0" role="alert"><div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
+                if (!document.querySelector('.toast-container')) { const c = document.createElement('div'); c.className = 'toast-container position-fixed bottom-0 end-0 p-3'; document.body.appendChild(c); }
+                document.querySelector('.toast-container').insertAdjacentHTML('beforeend', toast);
+                const toastEl = document.getElementById(id);
+                new bootstrap.Toast(toastEl, { delay: 3000 }).show();
             }
 
-            // =================================================================
-            // Charts
-            // =================================================================
-            function updateExpensesChart() {
-                const ctx = document.getElementById('expensesChart').getContext('2d');
-                if (expensesChart) {
-                    expensesChart.destroy();
+            // NEW: Populate Year Filter
+            function populateYearFilter() {
+                if(allTransactions.length === 0) { yearSelect.innerHTML = ''; return; }
+                const years = [...new Set(allTransactions.map(t => new Date(t.date).getFullYear()))].sort((a,b) => b - a);
+                yearSelect.innerHTML = `<option value="all">كل السنوات</option>`;
+                years.forEach(year => {
+                    yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+                });
+            }
+            
+            // MODIFIED: Statistics Chart
+            function updateMonthlyChart() {
+                const ctx = document.getElementById('monthlyChart').getContext('2d');
+                if (monthlyChart) monthlyChart.destroy();
+                
+                const selectedYear = yearSelect.value;
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                const textColor = isDarkMode ? '#F2F2F7' : '#1D1D1F';
+                let labels, incomeData, expenseData, title;
+
+                let hasData = false;
+
+                if (selectedYear === 'all') {
+                    // Yearly comparison view
+                    const yearlyData = allTransactions.reduce((acc, t) => {
+                        const year = new Date(t.date).getFullYear();
+                        if (!acc[year]) acc[year] = { income: 0, expense: 0 };
+                        acc[year][t.type] += t.amount;
+                        return acc;
+                    }, {});
+                    labels = Object.keys(yearlyData).sort();
+                    incomeData = labels.map(y => yearlyData[y].income);
+                    expenseData = labels.map(y => yearlyData[y].expense);
+                    title = 'مقارنة بين السنوات';
+                    if (labels.length > 0) hasData = true;
+
+                } else {
+                    // Monthly view for a specific year
+                    const year = parseInt(selectedYear);
+                    const monthlyData = Array(12).fill(null).map(() => ({ income: 0, expense: 0 }));
+                    allTransactions.filter(t => new Date(t.date).getFullYear() === year).forEach(t => {
+                        const month = new Date(t.date).getMonth();
+                        monthlyData[month][t.type] += t.amount;
+                    });
+                    labels = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                    incomeData = monthlyData.map(m => m.income);
+                    expenseData = monthlyData.map(m => m.expense);
+                    title = `إحصائيات عام ${year}`;
+                    if(incomeData.some(d => d > 0) || expenseData.some(d => d > 0)) hasData = true;
                 }
+                
+                // Show/hide no data message
+                noChartData.classList.toggle('hidden', hasData);
+                document.getElementById('monthlyChart').classList.toggle('hidden', !hasData);
+                if (!hasData) return;
 
-                const expenses = allTransactions.filter(t => t.type === 'expense');
-                if (expenses.length === 0) { return; } // Handle no data
-
-                const categoryTotals = expenses.reduce((acc, t) => {
-                    acc[t.category] = (acc[t.category] || 0) + t.amount;
-                    return acc;
-                }, {});
-
-                const labels = Object.keys(categoryTotals);
-                const data = Object.values(categoryTotals);
-
-                expensesChart = new Chart(ctx, {
-                    type: 'doughnut',
+                monthlyChart = new Chart(ctx, {
+                    type: 'bar',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#5AC8FA', '#5856D6', '#AF52DE'],
-                            borderWidth: 0,
-                        }]
+                        datasets: [
+                            { label: 'الدخل', data: incomeData, backgroundColor: '#34C759', borderRadius: 4 },
+                            { label: 'المصروفات', data: expenseData, backgroundColor: '#FF3B30', borderRadius: 4 }
+                        ]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    font: { family: 'Cairo' },
-                                    color: document.body.classList.contains('dark-mode') ? '#F2F2F7' : '#1D1D1F'
-                                }
-                            }
-                        }
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: textColor } }, title: { display: true, text: title, color: textColor, font: { size: 16 } } },
+                        scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } }
                     }
                 });
             }
             
-            // =================================================================
-            // Exporting
-            // =================================================================
-            function exportToExcel() {
-                const expenses = allTransactions.filter(t => t.type === 'expense');
-                if(expenses.length === 0) {
-                     showNotification('لا توجد مصروفات للتصدير', 'warning');
-                     return;
+            // Data Export
+            function exportData(format) {
+                if (allTransactions.length === 0) { showNotification('لا توجد بيانات للتصدير.', 'warning'); return; }
+                const data = allTransactions.map(t => ({ 'التاريخ': new Date(t.date).toLocaleDateString('ar-EG'), 'النوع': t.type === 'income' ? 'دخل' : 'مصروف', 'التصنيف': t.category, 'الوصف': t.description || '-', 'المبلغ': t.amount }));
+                if (format === 'excel') {
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'العمليات');
+                    XLSX.writeFile(wb, 'Mali_Data.xlsx');
+                } else if (format === 'pdf') {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    doc.addFont('https://fonts.gstatic.com/s/cairo/v28/SLXgc1nY6HkvangtZmpQdkhYl0w.ttf', 'Cairo', 'normal'); doc.setFont('Cairo');
+                    doc.text('تقرير العمليات المالية', 105, 15, { align: 'center' });
+                    doc.autoTable({
+                        head: [['المبلغ', 'الوصف', 'التصنيف', 'النوع', 'التاريخ']],
+                        body: data.map(t => [t.المبلغ, t.الوصف, t.التصنيف, t.النوع, t.التاريخ]),
+                        startY: 25, theme: 'grid', styles: { font: 'Cairo', halign: 'right' }, headStyles: { fillColor: [94, 92, 230] }
+                    });
+                    doc.save('Mali_Data.pdf');
                 }
-                const data = expenses.map(t => ({
-                    'التاريخ': new Date(t.date).toLocaleDateString('ar-EG'),
-                    'التصنيف': t.category,
-                    'الوصف': t.description,
-                    'المبلغ': t.amount,
-                }));
-
-                const ws = XLSX.utils.json_to_sheet(data);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'المصروفات');
-                XLSX.writeFile(wb, 'Mali_Expenses.xlsx');
                 exportModal.hide();
-                showNotification('تم تصدير Excel بنجاح', 'success');
+                showNotification(`تم تصدير ${format.toUpperCase()} بنجاح.`, 'success');
             }
-
-            function exportToPdf() {
-                const expenses = allTransactions.filter(t => t.type === 'expense');
-                 if(expenses.length === 0) {
-                     showNotification('لا توجد مصروفات للتصدير', 'warning');
-                     return;
-                }
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.addFont('https://fonts.gstatic.com/s/cairo/v28/SLXgc1nY6HkvangtZmpQdkhYl0w.ttf', 'Cairo', 'normal');
-                doc.setFont('Cairo');
-
-                doc.text('تقرير المصروفات', 105, 15, { align: 'center' });
-
-                const tableColumn = ["المبلغ", "الوصف", "التصنيف", "التاريخ"];
-                const tableRows = [];
-
-                expenses.forEach(t => {
-                    const rowData = [
-                        t.amount.toFixed(2),
-                        t.description || '-',
-                        t.category,
-                        new Date(t.date).toLocaleDateString('ar-EG'),
-                    ];
-                    tableRows.push(rowData);
-                });
-
-                doc.autoTable({
-                    head: [tableColumn],
-                    body: tableRows,
-                    startY: 25,
-                    theme: 'grid',
-                    styles: { font: 'Cairo', halign: 'right' },
-                    headStyles: { fillColor: [94, 92, 230] } // primary color
-                });
-                
-                doc.save('Mali_Expenses.pdf');
-                exportModal.hide();
-                showNotification('تم تصدير PDF بنجاح', 'success');
-            }
-
-
-            // Run the app
+            
             init();
         });
     </script>
