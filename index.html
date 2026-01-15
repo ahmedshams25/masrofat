@@ -53,16 +53,10 @@
             --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
 
-        /* Dark Mode Text Fixes */
-        .dark-mode .text-success {
-            color: var(--success-color) !important;
-        }
-        .dark-mode .text-danger {
-            color: var(--danger-color) !important;
-        }
-        .dark-mode .text-primary {
-            color: var(--primary-color) !important;
-        }
+        /* == DARK MODE FIXES == */
+        .dark-mode .text-success { color: var(--success-color) !important; }
+        .dark-mode .text-danger { color: var(--danger-color) !important; }
+        .dark-mode .text-primary { color: var(--primary-color) !important; }
         .dark-mode .btn-outline-primary {
             color: var(--primary-color);
             border-color: var(--primary-color);
@@ -150,8 +144,10 @@
             color: var(--text-secondary);
             font-size: 0.85rem;
         }
-        /* Transactions List */
-        .transactions-container { max-height: 80vh; overflow-y: auto; padding: 0.5rem; }
+        
+        /* == LAYOUT FIX: Removed fixed height from this container == */
+        .transactions-container { padding: 0.5rem; }
+
         .transaction-item {
             display: flex; align-items: center; padding: 1rem; margin-bottom: 0.75rem;
             border-radius: var(--radius); transition: var(--transition); background-color: var(--card-bg);
@@ -275,7 +271,8 @@
             </div>
             <!-- RIGHT COLUMN -->
             <div class="col-lg-7">
-                <div class="card" style="height: 95vh;">
+                <!-- == LAYOUT FIX: Changed height to max-height and made the card a flex container to control internal scrolling == -->
+                <div class="card" style="max-height: 88vh; display: flex; flex-direction: column;">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div><i class="bi bi-list-ul me-2"></i>سجل العمليات</div>
                         <div class="d-flex gap-2">
@@ -284,7 +281,8 @@
                              <button id="exportBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-download"></i></button>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <!-- == LAYOUT FIX: Made the card body scrollable on overflow == -->
+                    <div class="card-body" style="overflow-y: auto;">
                          <div id="transactionsList" class="transactions-container"></div>
                          <div id="noTransactions" class="text-center py-5">
                             <i class="bi bi-journal-x fs-1 text-secondary mb-3"></i>
@@ -562,7 +560,7 @@
                 const ctx = expensesByCategoryChartCanvas.getContext('2d');
                 if (expenseByCategoryChart) expenseByCategoryChart.destroy();
                 const expenses = allTransactions.filter(t => t.type === 'expense');
-                noExpenseData.classList.toggle('hidden', expenses.length === 0);
+                noExpenseData.classList.toggle('hidden', expenses.length > 0);
                 expensesByCategoryChartCanvas.classList.toggle('hidden', expenses.length === 0);
                 if (expenses.length === 0) return;
                 const categoryTotals = expenses.reduce((acc, t) => {
