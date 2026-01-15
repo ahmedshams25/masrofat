@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ويدجت المصروفات</title>
+    <style>
+        /* تنسيقات لجعل شكل الويدجت نظيفاً ومناسباً للعرض داخل الداش بورد */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: transparent; /* خلفية شفافة لتندمج مع الداش بورد */
+            margin: 0;
+            padding: 10px;
+            color: #333;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #3f51b5;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            max-height: 200px; /* تحديد ارتفاع أقصى للقائمة مع شريط تمرير */
+            overflow-y: auto;
+        }
+        li {
+            background: #f9f9f9;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            border-right: 5px solid #3f51b5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #total-container {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>قائمة المصروفات</h2>
+    <ul id="expense-list"></ul>
+
+    <div id="total-container">
+        <span>الإجمالي: </span>
+        <span id="total-expenses">0</span>
+        <span>جنيه</span>
+    </div>
+
+    <script>
+        // هذا الكود هو نفسه الموجود في تطبيقك الأصلي، ولكنه يركز على العرض فقط
+        document.addEventListener('DOMContentLoaded', () => {
+            const expenseList = document.getElementById('expense-list');
+            const totalExpensesSpan = document.getElementById('total-expenses');
+            let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+            function renderExpenses() {
+                expenseList.innerHTML = '';
+                let total = 0;
+                expenses.forEach(expense => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${expense.name}</span> <span>${expense.amount} جنيه</span>`;
+                    expenseList.appendChild(li);
+                    total += expense.amount;
+                });
+                totalExpensesSpan.textContent = total.toFixed(2);
+            }
+
+            renderExpenses();
+
+            // ميزة إضافية: هذا السطر يجعل الويدجت يستمع لأي تغييرات تحدث في التطبيق الأصلي
+            // ويعكسها مباشرة في لوحة التحكم بدون الحاجة لإعادة تحميل الصفحة!
+            window.addEventListener('storage', () => {
+                expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+                renderExpenses();
+            });
+        });
+    </script>
+
+</body>
+</html>
