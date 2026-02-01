@@ -19,7 +19,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
         /* CSS Variables for Theming */
         :root {
@@ -36,26 +35,23 @@
             --bg-color: #F2F2F7;
             --card-bg: #FFFFFF;
             --border-color: #E5E5EA;
-
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             --radius: 1rem;
             --transition: all 0.3s ease;
             --font-family: 'Cairo', sans-serif;
         }
-
         .dark-mode {
             --primary-color: #645DF6;
             --primary-light: #817EF8;
             --success-color: #32D74B;
             --danger-color: #FF453A;
             --text-primary: #F2F2F7;
-            --text-secondary: #8E8E93;
+            --text-secondary: #BDBDC2; /* Changed for better contrast */
             --bg-color: #121212;
             --card-bg: #1E1E1E;
             --border-color: #3A3A3C;
             --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
-
         /* Base Styles */
         body {
             background-color: var(--bg-color);
@@ -133,7 +129,6 @@
             color: var(--text-secondary);
             font-size: 0.85rem;
         }
-
         /* Transactions List */
         .transactions-container { max-height: 80vh; overflow-y: auto; padding: 0.5rem; }
         .transaction-item {
@@ -149,7 +144,6 @@
     </style>
 </head>
 <body class="">
-
     <!-- Auth Screen -->
     <div id="authScreen" class="auth-container">
         <div class="auth-card card">
@@ -186,7 +180,6 @@
             </div>
         </div>
     </div>
-
     <!-- Main App Screen -->
     <div id="appScreen" class="container-fluid py-4 px-lg-5 hidden">
         
@@ -200,7 +193,6 @@
                 <button id="logoutBtn" class="btn btn-light btn-sm fw-600"><i class="bi bi-box-arrow-right me-2"></i>خروج</button>
             </div>
         </header>
-
         <div class="row g-4">
             <!-- LEFT COLUMN -->
             <div class="col-lg-5">
@@ -209,7 +201,6 @@
                     <div class="col-6"><div class="stat-card card"><div class="card-body"><p class="text-secondary fw-600 mb-1">إجمالي الدخل</p><h5 class="text-success" id="totalIncome">0 ج.م</h5></div></div></div>
                     <div class="col-6"><div class="stat-card card"><div class="card-body"><p class="text-secondary fw-600 mb-1">إجمالي المصروفات</p><h5 class="text-danger" id="totalExpense">0 ج.م</h5></div></div></div>
                 </div>
-
                 <div class="card">
                     <div class="card-header"><i class="bi bi-plus-circle-fill me-2"></i>إضافة عملية جديدة</div>
                     <div class="card-body">
@@ -260,7 +251,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- RIGHT COLUMN -->
             <div class="col-lg-7">
                 <div class="card" style="height: 95vh;">
@@ -287,7 +277,6 @@
     <!-- Modals (Edit, Export) -->
     <div class="modal fade" id="editModal" tabindex="-1"> <div class="modal-dialog modal-dialog-centered"> <div class="modal-content"> <div class="modal-header"><h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>تعديل العملية</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div> <div class="modal-body"> <form id="editForm"> <input type="hidden" id="editId"> <div class="mb-3"><label for="editAmount" class="form-label fw-600">المبلغ</label><input type="number" class="form-control" id="editAmount" required></div> <div class="row mb-3"> <div class="col-6"><label for="editType" class="form-label fw-600">النوع</label><select class="form-select" id="editType" required><option value="expense">مصروف</option><option value="income">دخل</option></select></div> <div class="col-6"><label for="editCategory" class="form-label fw-600">التصنيف</label><select class="form-select" id="editCategory" required></select></div> </div> <div class="mb-3"><label for="editDate" class="form-label fw-600">التاريخ</label><input type="date" class="form-control" id="editDate" required></div> <div class="mb-3"><label for="editDescription" class="form-label fw-600">الوصف</label><input type="text" class="form-control" id="editDescription"></div> </form> </div> <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="button" id="saveEditBtn" class="btn btn-primary"><i class="bi bi-save me-2"></i>حفظ</button></div> </div> </div> </div>
     <div class="modal fade" id="exportModal" tabindex="-1"> <div class="modal-dialog modal-dialog-centered"> <div class="modal-content"> <div class="modal-header"><h5 class="modal-title fw-bold"><i class="bi bi-download me-2"></i>تصدير البيانات</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div> <div class="modal-body text-center"> <p class="fw-600">تصدير بيانات المصروفات والدخل.</p> <div class="d-grid gap-2 mt-4"> <button id="exportToExcelBtn" class="btn btn-success btn-lg"><i class="bi bi-file-earmark-excel-fill me-2"></i>Excel</button> <button id="exportToPdfBtn" class="btn btn-danger btn-lg"><i class="bi bi-file-earmark-pdf-fill me-2"></i>PDF</button> </div> </div> </div> </div> </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Your Firebase configuration
@@ -300,11 +289,9 @@
             appId: "1:997053169222:web:5cdd2a2901265b7f2ad447",
             measurementId: "G-RTBRP79JDL"
         };
-
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
-
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
             const authScreen = document.getElementById('authScreen'), appScreen = document.getElementById('appScreen');
@@ -322,10 +309,10 @@
             const noChartData = document.getElementById('noChartData');
             const expensesByCategoryChartCanvas = document.getElementById('expensesByCategoryChart');
             const noExpenseData = document.getElementById('noExpenseData');
-
             let monthlyChart, expenseByCategoryChart;
             let currentUser, allTransactions = [];
-            const incomeCategories = ['راتب', 'هدية', 'استثمار', 'أخرى'], expenseCategories = ['أكل', 'مواصلات', 'تسوق', 'ترفيه', 'فواتير', 'صحة', 'تعليم', 'أخرى'];
+            // UPDATED CATEGORIES
+            const incomeCategories = ['راتب', 'استثمار', 'أخرى'], expenseCategories = ['أكل', 'مواصلات', 'تسوق', 'ترفيه', 'فواتير', 'صحة', 'تعليم', 'هدية', 'أخرى'];
             
             function init() {
                 auth.onAuthStateChanged(user => {
@@ -351,7 +338,6 @@
                 setupEventListeners();
                 new bootstrap.Tooltip(document.getElementById('themeToggle'));
             }
-
             function setupEventListeners() {
                 loginBtn.addEventListener('click', handleAuth.bind(null, 'login'));
                 signupBtn.addEventListener('click', handleAuth.bind(null, 'signup'));
@@ -377,7 +363,6 @@
                     updateMonthlyChart();
                 });
             }
-
             function handleAuth(type, e) {
                 e.preventDefault();
                 const email = authEmail.value, password = authPassword.value;
@@ -393,7 +378,6 @@
             function getAuthErrorMessage(code) {
                  switch (code) { case 'auth/user-not-found': return 'المستخدم غير موجود.'; case 'auth/wrong-password': return 'كلمة المرور خاطئة.'; case 'auth/invalid-email': return 'البريد الإلكتروني غير صالح.'; case 'auth/email-already-in-use': return 'البريد الإلكتروني مستخدم بالفعل.'; case 'auth/weak-password': return 'كلمة المرور ضعيفة (6 أحرف على الأقل).'; default: return 'حدث خطأ غير متوقع.'; }
             }
-
             function loadUserData() {
                 database.ref(`users/${currentUser.uid}/transactions`).on('value', snapshot => {
                     allTransactions = [];
@@ -460,19 +444,15 @@
             function updateDashboard() {
                 const selectedYear = yearSelect.value;
                 let transactionsToDisplay = allTransactions;
-
                 if (selectedYear && selectedYear !== 'all') {
                     transactionsToDisplay = allTransactions.filter(t => new Date(t.date).getFullYear() === parseInt(selectedYear));
                 }
-
                 const income = transactionsToDisplay.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
                 const expense = transactionsToDisplay.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-
                 currentBalance.textContent = `${(income - expense).toLocaleString()} ج.م`;
                 totalIncome.textContent = `+${income.toLocaleString()} ج.م`;
                 totalExpense.textContent = `-${expense.toLocaleString()} ج.م`;
             }
-
             function updateCategoryOptions(type, isMainForm = true) {
                 const select = isMainForm ? categorySelect : editCategorySelect;
                 select.innerHTML = (type === 'income' ? incomeCategories : expenseCategories).map(c => `<option value="${c}">${c}</option>`).join('');
@@ -494,7 +474,6 @@
                 const toastEl = document.getElementById(id);
                 new bootstrap.Toast(toastEl, { delay: 3000 }).show();
             }
-
             function populateYearFilter() {
                 if(allTransactions.length === 0) { yearSelect.innerHTML = ''; return; }
                 const years = [...new Set(allTransactions.map(t => new Date(t.date).getFullYear()))].sort((a,b) => b - a);
@@ -513,7 +492,6 @@
                 const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
                 const textColor = isDarkMode ? '#F2F2F7' : '#1D1D1F';
                 let labels, incomeData, expenseData, title, hasData = false;
-
                 if (selectedYear === 'all') {
                     const yearlyData = allTransactions.reduce((acc, t) => {
                         const year = new Date(t.date).getFullYear();
@@ -526,7 +504,6 @@
                     expenseData = labels.map(y => yearlyData[y].expense);
                     title = 'مقارنة بين السنوات';
                     if (labels.length > 0) hasData = true;
-
                 } else {
                     const year = parseInt(selectedYear);
                     const monthlyData = Array(12).fill(null).map(() => ({ income: 0, expense: 0 }));
@@ -541,10 +518,9 @@
                     if(incomeData.some(d => d > 0) || expenseData.some(d => d > 0)) hasData = true;
                 }
                 
-                noChartData.classList.toggle('hidden', hasData);
+                noChartData.classList.toggle('hidden', !hasData);
                 document.getElementById('monthlyChart').classList.toggle('hidden', !hasData);
                 if (!hasData) return;
-
                 monthlyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -561,26 +537,21 @@
                     }
                 });
             }
-
             function updateExpensesByCategoryChart() {
                 const ctx = expensesByCategoryChartCanvas.getContext('2d');
                 if (expenseByCategoryChart) expenseByCategoryChart.destroy();
-
                 const expenses = allTransactions.filter(t => t.type === 'expense');
                 noExpenseData.classList.toggle('hidden', expenses.length > 0);
                 expensesByCategoryChartCanvas.classList.toggle('hidden', expenses.length === 0);
                 if (expenses.length === 0) return;
-
                 const categoryTotals = expenses.reduce((acc, t) => {
                     acc[t.category] = (acc[t.category] || 0) + t.amount;
                     return acc;
                 }, {});
-
                 const labels = Object.keys(categoryTotals);
                 const data = Object.values(categoryTotals);
                 const isDarkMode = document.body.classList.contains('dark-mode');
                 const textColor = isDarkMode ? '#F2F2F7' : '#1D1D1F';
-
                 expenseByCategoryChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
