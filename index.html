@@ -22,14 +22,17 @@
         body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; transition: 0.3s; }
         .card { background: var(--card); border: none; border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
         .app-header { padding: 1.5rem; border-radius: var(--radius); background: linear-gradient(135deg, var(--primary), #8E8E93); color: white; margin-bottom: 2rem; }
-        .transaction-item { padding: 1rem; margin-bottom: 0.8rem; border-radius: 1rem; background: var(--card); border-right: 5px solid; display: flex; align-items: center; justify-content: space-between; }
+        .transaction-item { padding: 1rem; margin-bottom: 0.8rem; border-radius: 1rem; background: var(--card); border-right: 5px solid; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+        .transaction-item:hover { transform: scale(1.01); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .income-item { border-right-color: var(--success); }
         .expense-item { border-right-color: var(--danger); }
         .hidden { display: none !important; }
         .chart-container { position: relative; height: 250px; width: 100%; }
         .btn-primary { background: var(--primary); border: none; border-radius: 0.8rem; padding: 0.6rem; }
         .desc-text { font-size: 0.85rem; color: #8E8E93; display: block; margin-top: 2px; }
-        .edit-mode-active { border: 2px solid var(--primary) !important; }
+        .action-btns i { cursor: pointer; margin-right: 10px; transition: 0.2s; }
+        .bi-pencil-square:hover { color: var(--primary); }
+        .bi-trash:hover { color: var(--danger); }
     </style>
 </head>
 <body>
@@ -66,10 +69,16 @@
                 </div>
             </div>
 
-            <div id="formCard" class="card p-3">
-                <h6 id="formTitle" class="fw-bold mb-3">إضافة عملية جديدة</h6>
+            <div class="card p-3">
+                <h6 class="fw-bold mb-3">توزيع المصروفات</h6>
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card p-3">
+                <h6 class="fw-bold mb-3">إضافة عملية جديدة</h6>
                 <form id="transactionForm">
-                    <input type="hidden" id="editId">
                     <input type="number" id="amount" class="form-control mb-2" placeholder="المبلغ" required>
                     <div class="row g-2 mb-2">
                         <div class="col-6"><select id="type" class="form-select"><option value="expense">مصروف</option><option value="income">دخل</option></select></div>
@@ -77,21 +86,17 @@
                     </div>
                     <input type="text" id="description" class="form-control mb-2" placeholder="وصف قصير (اختياري)">
                     <input type="date" id="date" class="form-control mb-3" required>
-                    <button type="submit" id="submitBtn" class="btn btn-primary w-100">حفظ العملية</button>
-                    <button type="button" id="cancelEdit" class="btn btn-link w-100 mt-2 text-danger hidden">إلغاء التعديل</button>
+                    <button type="submit" class="btn btn-primary w-100">حفظ العملية</button>
                 </form>
-            </div>
-
-            <div class="card p-3">
-                <h6 class="fw-bold mb-3">توزيع المصروفات</h6>
-                <div class="chart-container"><canvas id="pieChart"></canvas></div>
             </div>
         </div>
 
         <div class="col-lg-8">
             <div class="card p-3">
                 <h6 class="fw-bold mb-3">تحليل الدخل والمصاريف شهرياً</h6>
-                <div class="chart-container"><canvas id="barChart"></canvas></div>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
             </div>
 
             <div class="card p-3">
@@ -105,7 +110,51 @@
     </div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content card p-3">
+      <div class="modal-header border-0">
+        <h5 class="fw-bold">تعديل العملية</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
+            <input type="hidden" id="editId">
+            <div class="mb-3">
+                <label class="small text-muted">المبلغ</label>
+                <input type="number" id="editAmount" class="form-control" required>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="small text-muted">النوع</label>
+                    <select id="editType" class="form-select">
+                        <option value="expense">مصروف</option>
+                        <option value="income">دخل</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="small text-muted">التصنيف</label>
+                    <select id="editCategory" class="form-select"></select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="small text-muted">الوصف</label>
+                <input type="text" id="editDescription" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="small text-muted">التاريخ</label>
+                <input type="date" id="editDate" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">حفظ التغييرات</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Firebase Config (نفس بياناتك)
     const firebaseConfig = { 
         apiKey: "AIzaSyBbYerrLcTE4o44bsBXPynHQ6ArXvtyEro", 
         authDomain: "masrofat-c544f.firebaseapp.com", 
@@ -123,6 +172,8 @@
         income: ['راتب', 'استثمار', 'عمل حر', 'أخرى'],
         expense: ['أكل', 'مواصلات', 'فواتير', 'صحة', 'ترفيه', 'هدية', 'أخرى']
     };
+
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -166,82 +217,6 @@
         renderList(filteredByYear);
     }
 
-    // --- وظائف التعديل والحذف ---
-    function editItem(id) {
-        const item = allData.find(t => t.id === id);
-        if (!item) return;
-
-        document.getElementById('editId').value = id;
-        document.getElementById('amount').value = item.amount;
-        document.getElementById('type').value = item.type;
-        document.getElementById('type').dispatchEvent(new Event('change'));
-        document.getElementById('category').value = item.category;
-        document.getElementById('description').value = item.description || '';
-        document.getElementById('date').value = item.date;
-
-        document.getElementById('formTitle').textContent = "تعديل العملية";
-        document.getElementById('submitBtn').textContent = "تحديث العملية";
-        document.getElementById('submitBtn').classList.replace('btn-primary', 'btn-warning');
-        document.getElementById('cancelEdit').classList.remove('hidden');
-        document.getElementById('formCard').classList.add('edit-mode-active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function resetForm() {
-        document.getElementById('transactionForm').reset();
-        document.getElementById('editId').value = '';
-        document.getElementById('formTitle').textContent = "إضافة عملية جديدة";
-        document.getElementById('submitBtn').textContent = "حفظ العملية";
-        document.getElementById('submitBtn').classList.replace('btn-warning', 'btn-primary');
-        document.getElementById('cancelEdit').classList.add('hidden');
-        document.getElementById('formCard').classList.remove('edit-mode-active');
-        document.getElementById('type').dispatchEvent(new Event('change'));
-        document.getElementById('date').value = new Date().toISOString().split('T')[0];
-    }
-
-    document.getElementById('transactionForm').onsubmit = e => {
-        e.preventDefault();
-        const editId = document.getElementById('editId').value;
-        const item = {
-            amount: parseFloat(document.getElementById('amount').value),
-            type: document.getElementById('type').value,
-            category: document.getElementById('category').value,
-            description: document.getElementById('description').value,
-            date: document.getElementById('date').value
-        };
-
-        if (editId) {
-            db.ref(`users/${currentUser.uid}/transactions/${editId}`).update(item).then(() => resetForm());
-        } else {
-            db.ref(`users/${currentUser.uid}/transactions`).push(item).then(() => resetForm());
-        }
-    };
-
-    document.getElementById('cancelEdit').onclick = resetForm;
-
-    function deleteItem(id) { if(confirm('هل تريد حذف هذه العملية نهائياً؟')) db.ref(`users/${currentUser.uid}/transactions/${id}`).remove(); }
-
-    // --- الرسوم البيانية والسجل ---
-    function renderList(data) {
-        const container = document.getElementById('list');
-        container.innerHTML = data.map(t => `
-            <div class="transaction-item ${t.type}-item">
-                <div style="flex: 1;">
-                    <b class="d-block">${t.category}</b>
-                    <span class="desc-text">${t.description || 'بدون وصف'}</span>
-                    <small class="text-secondary" style="font-size: 0.7rem;">${t.date}</small>
-                </div>
-                <div class="text-end">
-                    <b class="${t.type === 'income' ? 'text-success' : 'text-danger'}">${t.amount.toLocaleString()} ج.م</b>
-                    <div class="mt-2">
-                        <i class="bi bi-pencil-square text-primary me-3" style="cursor:pointer" onclick="editItem('${t.id}')"></i>
-                        <i class="bi bi-trash text-muted" style="cursor:pointer" onclick="deleteItem('${t.id}')"></i>
-                    </div>
-                </div>
-            </div>
-        `).join('') || '<p class="text-center py-4">لا توجد بيانات</p>';
-    }
-
     function renderBarChart(dataToChart) {
         const ctx = document.getElementById('barChart').getContext('2d');
         if (barChart) barChart.destroy();
@@ -259,7 +234,16 @@
                     { label: 'صرف', data: monthly.map(m => m.e), backgroundColor: '#FF3B30' }
                 ]
             },
-            options: { maintainAspectRatio: false }
+            options: {
+                maintainAspectRatio: false,
+                onClick: (e, el) => {
+                    if (el.length > 0) {
+                        const mIdx = el[0].index;
+                        const type = el[0].datasetIndex === 0 ? 'income' : 'expense';
+                        filterByMonth(mIdx, type, dataToChart);
+                    }
+                }
+            }
         });
     }
 
@@ -273,12 +257,87 @@
             type: 'doughnut',
             data: {
                 labels: Object.keys(catTotals),
-                datasets: [{ data: Object.values(catTotals), backgroundColor: ['#FF3B30', '#FF9500', '#FFCC00', '#AF52DE', '#5856D6', '#007AFF', '#5AC8FA'] }]
+                datasets: [{
+                    data: Object.values(catTotals),
+                    backgroundColor: ['#FF3B30', '#FF9500', '#FFCC00', '#AF52DE', '#5856D6', '#007AFF', '#5AC8FA']
+                }]
             },
             options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {size: 10} } } } }
         });
     }
 
+    function filterByMonth(mIdx, type, currentYearScope) {
+        const filtered = currentYearScope.filter(t => {
+            const d = new Date(t.date);
+            return d.getMonth() === mIdx && t.type === type;
+        });
+        const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+        document.getElementById('filterTag').textContent = `${type === 'income' ? 'دخل' : 'مصاريف'} ${monthNames[mIdx]}`;
+        document.getElementById('filterTag').classList.remove('hidden');
+        document.getElementById('clearFilter').classList.remove('hidden');
+        renderList(filtered);
+    }
+
+    function renderList(data) {
+        const container = document.getElementById('list');
+        container.innerHTML = data.map(t => `
+            <div class="transaction-item ${t.type}-item">
+                <div style="flex: 1;">
+                    <b class="d-block">${t.category}</b>
+                    <span class="desc-text">${t.description || 'بدون وصف'}</span>
+                    <small class="text-secondary" style="font-size: 0.7rem;">${t.date}</small>
+                </div>
+                <div class="text-end">
+                    <b class="${t.type === 'income' ? 'text-success' : 'text-danger'}">${t.amount.toLocaleString()} ج.م</b>
+                    <div class="action-btns mt-1">
+                        <i class="bi bi-pencil-square text-muted" onclick="openEditModal('${t.id}')"></i>
+                        <i class="bi bi-trash text-muted" onclick="deleteItem('${t.id}')"></i>
+                    </div>
+                </div>
+            </div>
+        `).join('') || '<p class="text-center py-4">لا توجد بيانات</p>';
+    }
+
+    // وظائف التعديل
+    function openEditModal(id) {
+        const item = allData.find(t => t.id === id);
+        if (!item) return;
+
+        document.getElementById('editId').value = id;
+        document.getElementById('editAmount').value = item.amount;
+        document.getElementById('editType').value = item.type;
+        document.getElementById('editDescription').value = item.description || '';
+        document.getElementById('editDate').value = item.date;
+
+        // تحديث التصنيفات في نافذة التعديل بناءً على النوع
+        const catSelect = document.getElementById('editCategory');
+        catSelect.innerHTML = categories[item.type].map(c => `<option value="${c}" ${c === item.category ? 'selected' : ''}>${c}</option>`).join('');
+        
+        editModal.show();
+    }
+
+    document.getElementById('editType').onchange = e => {
+        document.getElementById('editCategory').innerHTML = categories[e.target.value].map(c => `<option value="${c}">${c}</option>`).join('');
+    };
+
+    document.getElementById('editForm').onsubmit = e => {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        const updatedData = {
+            amount: parseFloat(document.getElementById('editAmount').value),
+            type: document.getElementById('editType').value,
+            category: document.getElementById('editCategory').value,
+            description: document.getElementById('editDescription').value,
+            date: document.getElementById('editDate').value
+        };
+        
+        db.ref(`users/${currentUser.uid}/transactions/${id}`).update(updatedData)
+            .then(() => {
+                editModal.hide();
+            });
+    };
+
+    // الوظائف العامة
     function updateYearDropdown() {
         const select = document.getElementById('yearSelect');
         const years = [...new Set(allData.map(t => new Date(t.date).getFullYear()))].sort((a,b)=>b-a);
@@ -286,15 +345,37 @@
         let options = `<option value="all">كل السنين</option>`;
         options += years.map(y => `<option value="${y}">${y}</option>`).join('');
         select.innerHTML = options;
-        if (currentVal) select.value = currentVal; else select.value = new Date().getFullYear();
+        if (currentVal) select.value = currentVal;
+        else select.value = new Date().getFullYear();
     }
 
     document.getElementById('yearSelect').onchange = refreshUI;
+    document.getElementById('clearFilter').onclick = refreshUI;
+    
     document.getElementById('type').onchange = e => {
         document.getElementById('category').innerHTML = categories[e.target.value].map(c => `<option value="${c}">${c}</option>`).join('');
     };
-    document.getElementById('loginBtn').onclick = () => auth.signInWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPassword').value);
-    document.getElementById('signupBtn').onclick = () => auth.createUserWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPassword').value);
+
+    document.getElementById('transactionForm').onsubmit = e => {
+        e.preventDefault();
+        const item = {
+            amount: parseFloat(document.getElementById('amount').value),
+            type: document.getElementById('type').value,
+            category: document.getElementById('category').value,
+            description: document.getElementById('description').value,
+            date: document.getElementById('date').value
+        };
+        db.ref(`users/${currentUser.uid}/transactions`).push(item).then(() => {
+            e.target.reset();
+            document.getElementById('type').dispatchEvent(new Event('change'));
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        });
+    };
+
+    function deleteItem(id) { if(confirm('هل تريد حذف هذه العملية؟')) db.ref(`users/${currentUser.uid}/transactions/${id}`).remove(); }
+    
+    document.getElementById('loginBtn').onclick = () => auth.signInWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPassword').value).catch(a => alert("خطأ: " + a.message));
+    document.getElementById('signupBtn').onclick = () => auth.createUserWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPassword').value).catch(a => alert("خطأ: " + a.message));
     document.getElementById('logoutBtn').onclick = () => auth.signOut();
     document.getElementById('themeToggle').onclick = () => document.body.classList.toggle('dark-mode');
 
